@@ -3,6 +3,10 @@
 #include <QFontMetrics>
 #include "gui/prop/prop_Panel.h"
 
+// namespace {
+// static const int kCollapsedPanelHeight = 22; // No longer needed
+// }
+
 namespace gui {
 namespace prop {
 
@@ -45,7 +49,10 @@ namespace prop {
         }
     }
 
-    void Panel::onChildrenClicked(bool) { this->updateGeometry(); }
+    void Panel::onChildrenClicked(bool) {
+        this->updateGeometry();
+        // this->update();
+    }
 
 } // namespace prop
 } // namespace gui
