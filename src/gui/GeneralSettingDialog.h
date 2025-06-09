@@ -35,7 +35,6 @@ public:
     bool cbCopyHasChanged();
     bool keyDelayHasChanged();
     QString theme();
-    bool fontSizeHasChanged() const;
 
 private:
     void saveSettings();
@@ -89,9 +88,6 @@ private:
 
     int mKeyDelay;
     QSpinBox* mKeyDelayBox;
-
-    int mInitialFontSize;
-    QSpinBox* mFontSizeBox;
 
     bool bAutoShowMesh;
     QCheckBox* mAutoShowMesh;

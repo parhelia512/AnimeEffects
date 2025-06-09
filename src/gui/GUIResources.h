@@ -7,7 +7,6 @@
 #include <QPixmap>
 #include <QHash>
 #include <QSettings>
-#include <QFont>
 #include <QPainter>
 #include <QPalette>
 #include <QColor>
@@ -69,12 +68,6 @@ public:
 
     QString getThemeLocation() { return mTheme.path(); };
     QString getTheme() { return mTheme.id(); };
-
-    // Font size methods
-    void setFontSize(int size);
-    int fontSize() const;
-    void applyFontSize(); // Added helper to apply font size
-
     // signals
     util::Signaler<void(theme::Theme&)> onThemeChanged;
     void triggerOnThemeChanged();
@@ -82,8 +75,6 @@ public:
     theme::Theme mTheme;
 
 private:
-    int mFontSize; // Added font size member
-
     typedef QHash<QString, QIcon*> IconMap;
     typedef QHash<QString, theme::Theme> ThemeMap;
 

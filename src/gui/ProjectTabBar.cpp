@@ -1,6 +1,5 @@
 #include <QFile>
 #include <QFileInfo>
-#include <QFontMetrics>
 #include "gui/ProjectTabBar.h"
 
 namespace gui {
@@ -8,10 +7,8 @@ namespace gui {
 //-------------------------------------------------------------------------------------------------
 ProjectTabBar::ProjectTabBar(QWidget* aParent, GUIResources& aResources):
     QTabBar(aParent), mProjects(), mSignal(true), mGUIResources(aResources) {
-    // static const int kHeight = 18; // Removed
-    QFontMetrics fm(this->font());
-    int dynamicHeight = fm.height() + 8; // fm.height() + padding
-    this->setGeometry(0, 0, aParent->geometry().width(), dynamicHeight);
+    static const int kHeight = 18;
+    this->setGeometry(0, 0, aParent->geometry().width(), kHeight);
     this->setUsesScrollButtons(false);
     this->setAutoFillBackground(true);
     this->setExpanding(false);
@@ -23,10 +20,8 @@ ProjectTabBar::ProjectTabBar(QWidget* aParent, GUIResources& aResources):
 }
 
 void ProjectTabBar::updateTabPosition(const QSize& aDisplaySize) {
-    // static const int kHeight = 18; // Removed
-    QFontMetrics fm(this->font());
-    int dynamicHeight = fm.height() + 8; // fm.height() + padding
-    this->setGeometry(0, 0, aDisplaySize.width(), dynamicHeight);
+    static const int kHeight = 18;
+    this->setGeometry(0, 0, aDisplaySize.width(), kHeight);
 }
 
 QString ProjectTabBar::getTabName(const core::Project& aProject) const {
@@ -38,20 +33,6 @@ void ProjectTabBar::onThemeUpdated(theme::Theme& aTheme) {
     QFile stylesheet(aTheme.path() + "/stylesheet/modetabbar.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text)) {
         this->setStyleSheet(QTextStream(&stylesheet).readAll());
-    }
-    // Recalculate height in case font changed with theme
-    if (parentWidget()) {
-        // Attempt to update geometry using parent's width, similar to constructor
-        // Or use current width if parent interaction is complex here
-        QFontMetrics fm(this->font());
-        int dynamicHeight = fm.height() + 8;
-        this->setGeometry(this->x(), this->y(), parentWidget()->width(), dynamicHeight);
-    } else {
-        // Fallback if no parent or width is not easily determined
-        QFontMetrics fm(this->font());
-        int dynamicHeight = fm.height() + 8;
-        // This might not be ideal if width is important and not maintained
-        this->setFixedHeight(dynamicHeight);
     }
 }
 

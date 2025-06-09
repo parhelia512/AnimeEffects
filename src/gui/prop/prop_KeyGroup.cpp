@@ -1,6 +1,5 @@
 #include <QIcon>
 #include <QLabel>
-#include <QFontMetrics>
 #include "gui/prop/prop_KeyGroup.h"
 
 namespace gui {
@@ -51,14 +50,7 @@ namespace prop {
         if (mChecked != aChecked) {
             mChecked = aChecked;
             this->setChecked(aChecked);
-            int targetHeight;
-            if (aChecked) {
-                targetHeight = QWIDGETSIZE_MAX;
-            } else {
-                QFontMetrics fm(this->font());
-                targetHeight = fm.lineSpacing() + 4; // Add some padding
-            }
-            this->setFixedHeight(targetHeight);
+            this->setFixedHeight(aChecked ? QWIDGETSIZE_MAX : 22);
 
             for (auto label : mLabels) {
                 label->setVisible(aChecked);
