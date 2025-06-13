@@ -193,11 +193,11 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResour
             connect(seventhPathAction, &QAction::triggered, [=]() { mainWindow->onOpenRecentTriggered(seventhPath); });
             connect(eigthPathAction, &QAction::triggered, [=]() { mainWindow->onOpenRecentTriggered(eigthPath); });
         }
-        auto saveProject = new QAction(tr("Save Project"), this);
-        auto saveProjectAs = new QAction(tr("Save Project As..."), this);
-        auto closeProject = new QAction(tr("Close Project"), this);
-        auto exportWindow = new QAction(tr("Export Project"), this);
-        auto exportAs = new QMenu(tr("(Legacy) Export Project As..."), this);
+        auto saveProject = new QAction(tr("Save project"), this);
+        auto saveProjectAs = new QAction(tr("Save project as..."), this);
+        auto closeProject = new QAction(tr("Close project"), this);
+        auto exportWindow = new QAction(tr("Export project as..."), this);
+        auto exportAs = new QMenu(tr("Legacy exporter (deprecated)"), this);
         {
             ctrl::VideoFormat gifFormat;
             gifFormat.name = "gif";
@@ -220,12 +220,33 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResour
                 exportAs->addAction(video);
             }
         }
+        auto quickExport = new QMenu(tr("Quickly export as..."), this);
+        {
+            auto pngs = new QAction(tr("PNG Sequence"), this);
+            auto gif_transparent = new QAction(tr("GIF Animation (Transparent)"), this);
+            auto gif_opaque = new QAction(tr("GIF Animation (Opaque)"), this);
+            auto webm_transparent = new QAction(tr("WebM Animation (Transparent)"), this);
+            auto webm_opaque = new QAction(tr("WebM Animation (Opaque)"), this);
+            auto mp4 = new QAction(tr("MP4 Video"), this);
+            auto avi = new QAction(tr("AVI Video"), this);
+
+            QVector<QAction*> actions = {pngs, gif_transparent, gif_opaque, webm_transparent, webm_opaque, mp4, avi};
+            QStringList formats = {"png", "gif_t", "gif_o", "webm_t", "webm_o", "mp4", "avi"};
+            assert(actions.size() == formats.size());
+            int i = 0;
+            for (auto action: actions) {
+                connect(action, &QAction::triggered, [=]() { mainWindow->onQuickExportTriggered(formats.at(i)); });
+                quickExport->addAction(action);
+                i++;
+            }
+        }
 
         mProjectActions.push_back(saveProject);
         mProjectActions.push_back(saveProjectAs);
         mProjectActions.push_back(closeProject);
         mProjectActions.push_back(exportWindow);
         mProjectActions.push_back(exportAs->menuAction());
+        mProjectActions.push_back(quickExport->menuAction());
 
         connect(newProject, &QAction::triggered, mainWindow, &MainWindow::onNewProjectTriggered);
         connect(openProject, &QAction::triggered, mainWindow, &MainWindow::onOpenProjectTriggered);
@@ -241,6 +262,8 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResour
         fileMenu->addAction(saveProject);
         fileMenu->addAction(saveProjectAs);
         fileMenu->addAction(exportWindow);
+        fileMenu->addAction(quickExport->menuAction());
+        fileMenu->addSeparator();
         fileMenu->addAction(exportAs->menuAction());
         fileMenu->addSeparator();
         fileMenu->addAction(closeProject);

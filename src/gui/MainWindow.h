@@ -61,6 +61,7 @@ public:
     void onCloseProjectTriggered();
     void onExportTriggered();
     void onExportImageSeqTriggered(const QString& aSuffix);
+    void onQuickExportTriggered(const QString& aFormat);
     void onExportVideoTriggered(const ctrl::VideoFormat& aFormat);
     void onPlayPauseTriggered();
     void onDockToggle();

@@ -1557,6 +1557,73 @@ void MainWindow::onExportImageSeqTriggered(const QString& aSuffix) {
         }
     }
 }
+
+void MainWindow::onQuickExportTriggered(const QString& aFormat) {
+    // General parameters
+    GeneralParams genParam;
+    genParam.fileName = mCurrent->fileName();
+    genParam.exportName = mCurrent->fileName();
+    genParam.exportDirectory = QFileDialog::getExistingDirectory(this, tr("Export Folder"));
+    genParam.exportFileName = QFileInfo(genParam.exportName).fileName();
+    genParam.osExportTarget = QFileInfo(genParam.exportName).absoluteFilePath();
+    genParam.nativeWidth = mCurrent->attribute().imageSize().width();
+    genParam.nativeHeight = mCurrent->attribute().imageSize().height();
+    genParam.exportWidth = mCurrent->attribute().imageSize().width();
+    genParam.exportHeight = mCurrent->attribute().imageSize().height();
+    genParam.aspectRatio = custom;
+    genParam.nativeFPS = mCurrent->attribute().fps();
+    genParam.fps = mCurrent->attribute().fps();
+    genParam.bitrate = 0;
+    genParam.imageExportQuality = 100;
+    genParam.allowTransparency = aFormat.contains("_t") || aFormat == "png";
+    genParam.forcePipe = false;
+    genParam.loop = true;
+    genParam.exportWithAudio = true;
+    genParam.useCustomParam = false;
+    frameExportRange fer;
+    fer.lastFrame = mCurrent->attribute().maxFrame();
+    genParam.nativeFrameRange = fer;
+    genParam.exportAllFrames = true;
+    genParam.exportRange = {fer};
+    genParam.exportToLast = true;
+    genParam.imageExportQuality = -1;
+    // Get format info
+    bool imageExport = false;
+    ImageParams img;
+    VideoParams vid;
+    if (aFormat == "png") {
+        imageExport = true;
+        img.format = availableImageFormats::png;
+    }
+    else {
+        if (aFormat.contains("gif")) {
+            vid.format = availableVideoFormats::gif;
+        }
+        else if (aFormat.contains("mp4")) {
+            vid.format = availableVideoFormats::mp4;
+        }
+        else if (aFormat.contains("avi")) {
+            vid.format = availableVideoFormats::avi;
+        }
+        else if (aFormat.contains("webm")) {
+            vid.format = availableVideoFormats::webm;
+        }
+        vid.intermediateFormat = availableIntermediateFormats::ppm;
+    }
+    // Export parameters
+    auto exParam = new exportParam();
+    exParam->generalParams = genParam;
+    exParam->imageParams = img;
+    exParam->videoParams = vid;
+    exParam->exportType = imageExport? exportTarget::image : exportTarget::video;
+
+    // Main export function
+    std::vector<audioConfig> validAudioStreams = AudioPlaybackWidget::getValidAudioStreams(*mCurrent->pConf);
+    if(isExportParamValid(exParam, exportWidget, &validAudioStreams)){
+        exportProject(*exParam, mCurrent, exportWidget, validAudioStreams);
+    }
+}
+
 void MainWindow::onExportVideoTriggered(const ctrl::VideoFormat& aFormat) {
     if (!mCurrent)
         return;
