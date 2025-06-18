@@ -22,19 +22,21 @@ public:
         Type_Back,
         Type_Elastic,
         Type_Bounce,
-        Type_TERM
+        Type_TERM,
+        Type_Custom
     };
 
-    enum Range { Range_In, Range_Out, Range_InOut, Range_TERM };
+    enum Range { Range_In, Range_Out, Range_InOut, Range_TERM};
+
+    struct CubicBezier {
+        float x1 = 0.0f;
+        float y1 = 1.0f;
+        float x2 = 0.0f;
+        float y2 = 1.0f;
+    };
 
     struct Param {
         Param()
-            // Deprecated due to poor performance
-            /*
-            : type(Easing::easingToEnum())
-            , range(Easing::rangeToEnum())
-            */
-
             :
             type(Type_Linear), range(Range_InOut), weight(1.0f) {}
         bool isValidParam() const;
@@ -43,6 +45,7 @@ public:
         Type type;
         Range range;
         float weight;
+        mutable CubicBezier cubicBezier;
     };
 
     static QString getTypeName(Type aType);
@@ -50,7 +53,7 @@ public:
     static QStringList getTypeNameList();
 
     static float calculate(Type, Range, float t, float b, float c, float d);
-    static float calculate(Param, float t, float b, float c, float d);
+    static float calculate(Param, float t, float b, float c, float d, bool bezier=false);
 
     static float sineIn(float t, float b, float c, float d);
     static float sineOut(float t, float b, float c, float d);

@@ -34,31 +34,31 @@ void AudioWorker::setVars(core::Project* proj, PlayBackWidget* play,
 
 void AudioWorker::onAudioUpdate() {
     if(mProject->pConf != nullptr && mProject->mediaPlayer != nullptr && mPlayBack->isPlaying()){
-            qDebug("-----");
-            qDebug(QString("Current frame = ").append(QString::number(currentFrame)).toStdString().c_str());
+            //qDebug("-----");
+            //qDebug(QString("Current frame = ").append(QString::number(currentFrame)).toStdString().c_str());
             int currentPlayer = 0;
             for (const auto& file : *mProject->pConf) {
-                qDebug(QString("Start frame = ").append(QString::number(file.startFrame)).toStdString().c_str());
-                qDebug(QString("End frame = ").append(QString::number(file.endFrame)).toStdString().c_str());
-                qDebug("-----");
+                //qDebug(QString("Start frame = ").append(QString::number(file.startFrame)).toStdString().c_str());
+                //qDebug(QString("End frame = ").append(QString::number(file.endFrame)).toStdString().c_str());
+                //qDebug("-----");
 
                 auto* player = mProject->mediaPlayer->players.at(currentPlayer);
 
                 if(player->playbackState() == QMediaPlayer::PlayingState){
                     if(currentFrame +- 1 != latestFrame && currentFrame != latestFrame +- 1 && currentFrame != latestFrame){
-                        qDebug() << "Current = " << currentFrame << "; Latest = " << latestFrame;
+                        //qDebug() << "Current = " << currentFrame << "; Latest = " << latestFrame;
                         AudioPlaybackWidget::correctTrackPos(player, currentFrame, frameMax, fps, const_cast<audioConfig&>(file));
                     }
-                    qDebug() << "Player at " << currentPlayer << " is playing.";
+                    //qDebug() << "Player at " << currentPlayer << " is playing.";
                     if (mProject->animator().isSuspended() || file.endFrame <= currentFrame || !file.playbackEnable) {
-                        qDebug("Request player stop");
+                        //qDebug("Request player stop");
                         player->stop();
                     }
                 }
                 else{
-                    qDebug() << "Player at " << currentPlayer << " is suspended.";
+                    //qDebug() << "Player at " << currentPlayer << " is suspended.";
                     if (file.startFrame <= currentFrame  && file.endFrame >= currentFrame && file.playbackEnable) {
-                        qDebug("Request player start");
+                        //qDebug("Request player start");
                         AudioPlaybackWidget::correctTrackPos(player, currentFrame, frameMax, fps, const_cast<audioConfig&>(file));
                         player->play();
                         mProject->mediaPlayer->playing = true;
@@ -94,7 +94,7 @@ void TimeLineInfoWidget::onUpdate() {
                 audioWorker->onAudioUpdate();
             });
             connect(audioWorker, &AudioWorker::onAudioUpdated, [=] {
-                qDebug("Audio update recieved");
+                //qDebug("Audio update received");
             });
             audioThread->start();
             connected = true;

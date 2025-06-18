@@ -1,3 +1,6 @@
+#include "Easing.h"
+
+
 #include <QtMath>
 #include "util/Easing.h"
 #include "util/EasingName.h"
@@ -97,6 +100,8 @@ Easing::Type Easing::easingToEnum(QString easing) {
         return Type_Elastic;
     if (aEasing == "Bounce")
         return Type_Bounce;
+    if (aEasing == "Custom")
+        return Type_Custom;
     return Type_Linear;
     // Default easing is Linear
 }
@@ -168,15 +173,65 @@ float Easing::calculate(Type aType, Range aRange, float t, float b, float c, flo
         RETURN_BY_EASING_FUNCTION(elastic);
     case Type_Bounce:
         RETURN_BY_EASING_FUNCTION(bounce);
+    case Type_Custom:
+
     default:
         return b;
     }
 #undef RETURN_BY_EASING_FUNCTION
 }
 
-float Easing::calculate(Param aParam, float t, float b, float c, float d) {
-    const float result = calculate(aParam.type, aParam.range, t, b, c, d);
+// Get cubic bezier
+double cubicBezier(double t, double p0, double p1, double p2, double p3) {
+    double mt = 1 - t;
+    return mt * mt * mt * p0 +
+           3 * mt * mt * t * p1 +
+           3 * mt * t * t * p2 +
+           t * t * t * p3;
+}
 
+// Get derivative for Newton-Raphson
+double cubicBezierDerivative(double t, double p0, double p1, double p2, double p3) {
+    double mt = 1 - t;
+    return 3 * mt * mt * (p1 - p0) +
+           6 * mt * t * (p2 - p1) +
+           3 * t * t * (p3 - p2);
+}
+
+// Solve x(t) = x using Newton-Raphson to get t
+double solveTForX(double x, double x1, double x2, double epsilon = 1e-6) {
+    double t = x; // Initial guess
+    for (int i = 0; i < 10; ++i) {
+        double xt = cubicBezier(t, 0.0, x1, x2, 1.0);
+        double dx = cubicBezierDerivative(t, 0.0, x1, x2, 1.0);
+        if (std::abs(dx) < 1e-8) break;
+        double tNext = t - (xt - x) / dx;
+        if (std::abs(tNext - t) < epsilon) break;
+        t = std::clamp(tNext, 0.0, 1.0);
+    }
+    return t;
+}
+
+double cubicBezierEasedPercent(double percent, double x1, double y1, double x2, double y2) {
+    double t = solveTForX(percent, x1, x2);
+    return cubicBezier(t, 0.0, y1, y2, 1.0);
+}
+
+float calculateBezier(Easing::Param aParam, float t, float b, float c, float d) {
+    // Relative frame, 0, 1, current frame
+    auto cubicBezier = aParam.cubicBezier;
+    auto result = c * (t / d) + b;
+    auto bezier = cubicBezierEasedPercent(result, cubicBezier.x1, cubicBezier.y1, cubicBezier.x2, cubicBezier.y2);
+    //qDebug() << "Bezier: " << bezier;
+    return bezier;
+}
+
+float Easing::calculate(Param aParam, float t, float b, float c, float d, bool bezier) {
+    if (bezier) {
+        //qDebug() << t << "|" << b  << "|" << c << "|" << d;
+        return calculateBezier(aParam, t, b, c, d);
+    }
+    const float result = calculate(aParam.type, aParam.range, t, b, c, d);
     if (aParam.type > Type_Linear) {
         return result * aParam.weight + (c * (t / d) + b) * (1.0f - aParam.weight);
     }
