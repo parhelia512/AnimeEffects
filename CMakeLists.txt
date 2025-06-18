@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 # set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 
 include(GNUInstallDirs)
-# You need to add the Qt directory to your path if you're on Windows, otherwise you'll have a very bad time
-
+# You need to add the Qt directory to your path, otherwise you'll have a very bad time
+# On MacOS Tahoe please remove AGL from the framework list when linking
 find_package(Qt6 REQUIRED COMPONENTS Core5Compat Core Gui OpenGL OpenGLWidgets Xml Concurrent Widgets Multimedia)
 # Get sources
 add_subdirectory(src/util)
