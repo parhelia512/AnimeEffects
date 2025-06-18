@@ -180,7 +180,7 @@ float Easing::calculate(Type aType, Range aRange, float t, float b, float c, flo
     }
 #undef RETURN_BY_EASING_FUNCTION
 }
-
+// TODO: Fix , KILL THIS WITH FIRE
 // Get cubic bezier
 double cubicBezier(double t, double p0, double p1, double p2, double p3) {
     double mt = 1 - t;
