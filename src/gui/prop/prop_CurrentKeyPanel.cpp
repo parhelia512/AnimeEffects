@@ -12,7 +12,7 @@ namespace gui {
 namespace prop {
 
     //-------------------------------------------------------------------------------------------------
-    MoveKeyGroup::MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    MoveKeyGroup::MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("Move"), aLabelWidth),
         mAccessor(aAccessor),
         mKnocker(),
@@ -32,7 +32,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignMoveEasing(aNext);
@@ -87,7 +87,7 @@ namespace prop {
     bool MoveKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    RotateKeyGroup::RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    RotateKeyGroup::RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("Rotate"), aLabelWidth), mAccessor(aAccessor), mKnocker(), mEasing(), mRotate(), mKeyExists(false) {
         using util::MathUtil;
         mKnocker = new KeyKnocker(tr("Rotate"));
@@ -101,7 +101,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignRotateEasing(aNext);
@@ -143,7 +143,7 @@ namespace prop {
     bool RotateKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    ScaleKeyGroup::ScaleKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    ScaleKeyGroup::ScaleKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("Scale"), aLabelWidth), mAccessor(aAccessor), mKnocker(), mEasing(), mScale(), mKeyExists(false) {
         mKnocker = new KeyKnocker(tr("Scale"));
         mKnocker->set([=]() {
@@ -156,7 +156,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignScaleEasing(aNext);
@@ -193,7 +193,7 @@ namespace prop {
     bool ScaleKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    DepthKeyGroup::DepthKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    DepthKeyGroup::DepthKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("Depth"), aLabelWidth), mAccessor(aAccessor), mKnocker(), mEasing(), mDepth(), mKeyExists(false) {
         mKnocker = new KeyKnocker(tr("Depth"));
         mKnocker->set([=]() {
@@ -206,7 +206,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignDepthEasing(aNext);
@@ -243,7 +243,7 @@ namespace prop {
     bool DepthKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    OpaKeyGroup::OpaKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    OpaKeyGroup::OpaKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("Opacity"), aLabelWidth),
         mAccessor(aAccessor),
         mKnocker(),
@@ -261,7 +261,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignOpaEasing(aNext);
@@ -299,7 +299,7 @@ namespace prop {
     bool OpaKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    HSVKeyGroup::HSVKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    HSVKeyGroup::HSVKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("HSV"), aLabelWidth),
         mAccessor(aAccessor),
         mKnocker(),
@@ -319,7 +319,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignHSVEasing(aNext);
@@ -380,7 +380,7 @@ namespace prop {
     bool HSVKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    PoseKeyGroup::PoseKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    PoseKeyGroup::PoseKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("Pose"), aLabelWidth), mAccessor(aAccessor), mKnocker(), mEasing(), mKeyExists(false) {
         mKnocker = new KeyKnocker(tr("Pose"));
         mKnocker->set([=]() {
@@ -393,7 +393,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignPoseEasing(aNext);
@@ -423,7 +423,7 @@ namespace prop {
     bool PoseKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    FFDKeyGroup::FFDKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth):
+    FFDKeyGroup::FFDKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources):
         KeyGroup(tr("FFD"), aLabelWidth), mAccessor(aAccessor), mKnocker(), mEasing(), mKeyExists(false) {
         mKnocker = new KeyKnocker(tr("FFD"));
         mKnocker->set([=]() {
@@ -436,7 +436,7 @@ namespace prop {
             aPanel.addGroup(this);
 
             // easing
-            mEasing = new EasingItem(this);
+            mEasing = new EasingItem(this, mGUIResources);
             this->addItem(tr("Easing :"), mEasing);
             mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext) {
                 this->mAccessor.assignFFDEasing(aNext);
@@ -466,7 +466,7 @@ namespace prop {
     bool FFDKeyGroup::keyExists() const { return mKeyExists; }
 
     //-------------------------------------------------------------------------------------------------
-    ImageKeyGroup::ImageKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, ViaPoint& aViaPoint):
+    ImageKeyGroup::ImageKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, ViaPoint& aViaPoint, GUIResources* mGUIResources):
         KeyGroup(tr("Image"), aLabelWidth),
         mAccessor(aAccessor),
         mKnocker(),
@@ -542,10 +542,11 @@ namespace prop {
 
     //-------------------------------------------------------------------------------------------------
     CurrentKeyPanel::CurrentKeyPanel(
-        ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent
+        ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent, GUIResources* mGUIResources
     ):
         Panel(aTitle, aParent),
         mViaPoint(aViaPoint),
+        mGUIResources(mGUIResources),
         mProject(aProject),
         mTarget(),
         mKeyAccessor(),
@@ -604,15 +605,15 @@ namespace prop {
     void CurrentKeyPanel::build() {
         using core::Constant;
 
-        mMovePanel.reset(new MoveKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mRotatePanel.reset(new RotateKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mScalePanel.reset(new ScaleKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mDepthPanel.reset(new DepthKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mOpaPanel.reset(new OpaKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mHSVPanel.reset(new HSVKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mPosePanel.reset(new PoseKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mFFDPanel.reset(new FFDKeyGroup(*this, mKeyAccessor, mLabelWidth));
-        mImagePanel.reset(new ImageKeyGroup(*this, mKeyAccessor, mLabelWidth, mViaPoint));
+        mMovePanel.reset(new MoveKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mRotatePanel.reset(new RotateKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mScalePanel.reset(new ScaleKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mDepthPanel.reset(new DepthKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mOpaPanel.reset(new OpaKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mHSVPanel.reset(new HSVKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mPosePanel.reset(new PoseKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mFFDPanel.reset(new FFDKeyGroup(*this, mKeyAccessor, mLabelWidth, mGUIResources));
+        mImagePanel.reset(new ImageKeyGroup(*this, mKeyAccessor, mLabelWidth, mViaPoint, mGUIResources));
 
         this->addStretch();
     }

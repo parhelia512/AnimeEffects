@@ -302,14 +302,6 @@ void TimeKeyBlender::clearCaches(ObjectNode* aRootNode) {
     }
 }
 
-float calculateSpline(const float y0, const float tangent0, const float y1, const float tangent1, const float t) {
-    const float t2 = t * t;
-    const float t3 = t2 * t;
-
-    return (2 * t3 - 3 * t2 + 1) * y0 + (t3 - 2 * t2 + t) * tangent0 + (-2 * t3 + 3 * t2) * y1 + (t3 - t2) * tangent1;
-
-}
-
 template<class tKey>
 float getEasingRateFromTwoKeys(const TimeKeyGatherer& aGatherer) {
     // blend keys
@@ -325,14 +317,6 @@ float getEasingRateFromTwoKeys(const TimeKeyGatherer& aGatherer) {
     if (easing.type == util::Easing::Type_Custom) {
         const float cubicBezier = util::Easing::calculate(easing, -p0.relativeFrame, 0.0f, 1.0f, frame, true);
         return cubicBezier;
-        /*util::Easing::CubicBezier bezier = k0->data().easing().cubicBezier;
-        auto t = -p0.relativeFrame;
-        auto d = frame;
-        auto b = 0.0f;
-        auto c = 1.0f;
-        auto weight = k0->data().easing().weight;
-        const float relativeResult = c * (t / d) + b;
-        return calculateSpline(p0.relativeFrame, p1.relativeFrame, bezier.x2, bezier.y2, relativeResult);*/
     }
     // calculate easing
     return util::Easing::calculate(easing, -p0.relativeFrame, 0.0f, 1.0f, frame);

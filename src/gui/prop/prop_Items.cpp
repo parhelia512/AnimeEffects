@@ -6,6 +6,8 @@
 #include "cmnd/ScopedMacro.h"
 #include "gui/prop/prop_Items.h"
 
+#include "GUIResources.h"
+
 #include <QToolButton>
 
 namespace gui {
@@ -146,7 +148,7 @@ namespace prop {
     }
 
     //-------------------------------------------------------------------------------------------------
-    EasingItem::EasingItem(QWidget* aParent): mLayout(), mBox(), mDBox(), mStamp(), mSignal(true) {
+    EasingItem::EasingItem(QWidget* aParent, const GUIResources* mGUIResources): mLayout(), mBox(), mDBox(), mStamp(), mSignal(true) {
         mLayout = new QHBoxLayout();
 
         for (int i = 0; i < 2; ++i) {
@@ -179,7 +181,8 @@ namespace prop {
         // Custom spline
         mCustomEasing = new QToolButton;
         mLayout->addWidget(mCustomEasing);
-        mCustomEasing->setText("Custom spline");
+        mCustomEasing->setIcon(mGUIResources->icon("ease"));
+        mCustomEasing->setToolTip(QCoreApplication::tr("Custom easing"));
         mCustomEasing->connect(mCustomEasing, &QToolButton::clicked, [=]() {
             mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
             this->onEditingFinished();

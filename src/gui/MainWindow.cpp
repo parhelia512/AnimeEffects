@@ -160,7 +160,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, LocalePa
         splitter->setObjectName("propertysplitter");
         dockWidget->setWidget(splitter);
 
-        mProperty = new PropertyWidget(mViaPoint, splitter);
+        mProperty = new PropertyWidget(mViaPoint, splitter, &mGUIResources);
         splitter->addWidget(mProperty);
 
         auto textEdit = new QPlainTextEdit(splitter);

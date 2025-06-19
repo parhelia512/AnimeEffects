@@ -204,7 +204,7 @@ double solveTForX(const double x, const double x1, const double x2, const double
         if (std::abs(dx) < 1e-8) break;
         double tNext = t - (xt - x) / dx;
         if (std::abs(tNext - t) < epsilon) break;
-        t = std::clamp(tNext, 0.0, 1.0);
+        t = std::clamp(tNext, -2.0, 2.0);
     }
     return t;
 }

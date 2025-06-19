@@ -29,8 +29,8 @@ public:
     enum Range { Range_In, Range_Out, Range_InOut, Range_TERM};
 
     struct CubicBezier {
-        float x1 = 0.0f;
-        float y1 = 1.0f;
+        float x1 = 1.0f;
+        float y1 = 0.0f;
         float x2 = 0.0f;
         float y2 = 1.0f;
     };

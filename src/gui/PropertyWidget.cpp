@@ -5,9 +5,10 @@
 
 namespace gui {
 
-PropertyWidget::PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent):
+PropertyWidget::PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent, GUIResources* aGUIResources):
     QScrollArea(aParent),
     mProject(),
+    mGUIResources(aGUIResources),
     mTimeLineSlot(),
     mNodeAttrSlot(),
     mResModifiedSlot(),
@@ -23,7 +24,7 @@ PropertyWidget::PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent):
     // this->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     this->setWidgetResizable(true);
 
-    mBoard = new prop::Backboard(aViaPoint, this);
+    mBoard = new prop::Backboard(aViaPoint, this, mGUIResources);
     this->setWidget(mBoard);
 }
 

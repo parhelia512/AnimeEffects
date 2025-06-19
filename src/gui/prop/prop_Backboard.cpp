@@ -3,11 +3,12 @@
 namespace gui {
 namespace prop {
 
-    Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent):
+    Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent, GUIResources* aGUIResources):
         QWidget(aParent),
         mViaPoint(aViaPoint),
         mProject(),
         mLayout(),
+        mGUIResources(aGUIResources),
         mConstantPanel(),
         mDefaultKeyPanel(),
         mCurrentKeyPanel() {
@@ -42,7 +43,7 @@ namespace prop {
             mLayout->addWidget(mDefaultKeyPanel.data());
             mLayout->setAlignment(mDefaultKeyPanel.data(), Qt::AlignTop);
 
-            mCurrentKeyPanel.reset(new CurrentKeyPanel(mViaPoint, *mProject, "Null", this));
+            mCurrentKeyPanel.reset(new CurrentKeyPanel(mViaPoint, *mProject, "Null", this, mGUIResources));
             mLayout->addWidget(mCurrentKeyPanel.data());
             mLayout->setAlignment(mCurrentKeyPanel.data(), Qt::AlignTop);
         }
