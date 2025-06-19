@@ -6,6 +6,8 @@
 #include "cmnd/ScopedMacro.h"
 #include "gui/prop/prop_Items.h"
 
+#include <QToolButton>
+
 namespace gui {
 namespace prop {
 
@@ -174,6 +176,15 @@ namespace prop {
         mDBox->setRange(0.0f, 1.0f);
         mDBox->setSingleStep(0.1);
 
+        // Custom spline
+        mCustomEasing = new QToolButton;
+        mLayout->addWidget(mCustomEasing);
+        mCustomEasing->setText("Custom spline");
+        mCustomEasing->connect(mCustomEasing, &QToolButton::clicked, [=]() {
+            mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
+            this->onEditingFinished();
+        });
+
         mStamp = value();
     }
 
@@ -205,6 +216,7 @@ namespace prop {
         param.type = (util::Easing::Type)mBox[0]->currentIndex();
         param.range = (util::Easing::Range)mBox[1]->currentIndex();
         param.weight = mDBox->value();
+        param.cubicBezier = {1, 0, 0, 1};
         return param;
     }
 

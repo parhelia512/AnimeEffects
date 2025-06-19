@@ -22,8 +22,8 @@ public:
         Type_Back,
         Type_Elastic,
         Type_Bounce,
+        Type_Custom,
         Type_TERM,
-        Type_Custom
     };
 
     enum Range { Range_In, Range_Out, Range_InOut, Range_TERM};
@@ -42,7 +42,7 @@ public:
         bool isValidParam() const;
         bool operator==(const Param& aRhs) const;
         inline bool operator!=(const Param& aRhs) const { return !(*this == aRhs); }
-        Type type;
+        mutable Type type;
         Range range;
         float weight;
         mutable CubicBezier cubicBezier;
@@ -53,7 +53,7 @@ public:
     static QStringList getTypeNameList();
 
     static float calculate(Type, Range, float t, float b, float c, float d);
-    static float calculate(Param, float t, float b, float c, float d, bool bezier=false);
+    static float calculate(const Param&, float t, float b, float c, float d, bool bezier=false);
 
     static float sineIn(float t, float b, float c, float d);
     static float sineOut(float t, float b, float c, float d);

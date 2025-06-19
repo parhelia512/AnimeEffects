@@ -154,6 +154,7 @@ namespace prop {
         std::array<QComboBox*, 2> mBox;
         DoubleSpinBox* mDBox;
         util::Easing::Param mStamp;
+        QToolButton* mCustomEasing;
         bool mSignal;
     };
 
