@@ -1,7 +1,7 @@
 #ifndef GUI_PROP_CURRENTKEYPANEL_H
 #define GUI_PROP_CURRENTKEYPANEL_H
 
-#include "GUIResources.h"
+#include "gui/GUIResources.h"
 #include "core/Project.h"
 #include "core/ObjectNode.h"
 #include "gui/ViaPoint.h"

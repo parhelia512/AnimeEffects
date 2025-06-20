@@ -153,7 +153,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, LocalePa
         mDockPropertyWidget = dockWidget;
 
 #if 0
-        mProperty = new PropertyWidget(dockWidget);
+        mProperty = new PropertyWidget(mViaPoint, splitter, &mGUIResources);
         dockWidget->setWidget(mProperty);
 #else
         auto splitter = new QSplitter(Qt::Vertical, dockWidget);

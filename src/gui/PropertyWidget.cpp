@@ -21,7 +21,7 @@ PropertyWidget::PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent, GUIResourc
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     // this->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    // this->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
+    this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     this->setWidgetResizable(true);
 
     mBoard = new prop::Backboard(aViaPoint, this, mGUIResources);

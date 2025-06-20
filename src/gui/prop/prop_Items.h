@@ -1,7 +1,7 @@
 #ifndef GUI_PROP_ITEMS_H
 #define GUI_PROP_ITEMS_H
 
-#include "GUIResources.h"
+#include "gui/GUIResources.h"
 
 
 #include <functional>

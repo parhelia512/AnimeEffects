@@ -19,8 +19,7 @@ namespace prop {
         if (mLayout)
             delete mLayout;
         mLayout = new QVBoxLayout();
-        mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-        mLayout->setSpacing(0);
+        mLayout->setSpacing(1);
         mLayout->setContentsMargins(2, 2, 2, 2);
         this->setLayout(mLayout);
     }
