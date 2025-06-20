@@ -181,7 +181,7 @@ float Easing::calculate(
     }
 #undef RETURN_BY_EASING_FUNCTION
 }
-// TODO: Fix , KILL THIS WITH FIRE
+// TODO: KILL THIS WITH FIRE
 // Get cubic bezier
 double cubicBezier(const double t, const double p0, const double p1, const double p2, const double p3) {
     double mt = 1 - t;
@@ -197,7 +197,7 @@ double cubicBezierDerivative(const double t, const double p0, const double p1, c
 // Solve x(t) = x using Newton-Raphson to get t
 double solveTForX(const double x, const double x1, const double x2, const double epsilon = 1e-6) {
     double t = x; // Initial guess
-    const int iter = 15;
+    constexpr int iter = 25; // Max iterations
     for (int i = 0; i < iter; ++i) {
         const double xt = cubicBezier(t, 0.0, x1, x2, 1.0);
         const double dx = cubicBezierDerivative(t, 0.0, x1, x2, 1.0);
@@ -210,22 +210,23 @@ double solveTForX(const double x, const double x1, const double x2, const double
 }
 
 double cubicBezierEasedPercent(const double percent, const double x1, const double y1, const double x2, const double y2) {
-    double t = solveTForX(percent, x1, x2);
+    const double t = solveTForX(percent, x1, x2);
     return cubicBezier(t, 0.0, y1, y2, 1.0);
 }
 
-float calculateBezier(Easing::Param aParam, const float t, const float b, const float c, const float d) {
-    // Param, relative frame, 0, 1, current frame
+float calculateBezier(const Easing::Param& aParam, const float t, const float b, const float c, const float d) {
     auto [x1, y1, x2, y2] = aParam.cubicBezier;
+    // Initial linear extrapolation
     const float result = c * (t / d) + b * aParam.weight + (c * (t / d) + b) * (1.0f - aParam.weight);
+    // Modify linear using a custom bezier curve
     const auto bezier = cubicBezierEasedPercent(result, x1, y1, x2, y2);
     return static_cast<float>(bezier);
 }
 
 
-float Easing::calculate(const Param& aParam, const float t, const float b, const float c, const float d, const bool bezier) {
-    if (bezier) {
-        //qDebug() << t << "|" << b  << "|" << c << "|" << d;
+float Easing::calculate(const Param& aParam, const float t, const float b, const float c, const float d) {
+    // Param, relative frame, 0, 1, current frame, is bezier?
+    if (aParam.type == Type_Custom) {
         return calculateBezier(aParam, t, b, c, d);
     }
     const float result = calculate(aParam.type, aParam.range, t, b, c, d);

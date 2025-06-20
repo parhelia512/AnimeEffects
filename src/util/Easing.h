@@ -53,7 +53,7 @@ public:
     static QStringList getTypeNameList();
 
     static float calculate(Type, Range, float t, float b, float c, float d);
-    static float calculate(const Param&, float t, float b, float c, float d, bool bezier=false);
+    static float calculate(const Param&, float t, float b, float c, float d);
 
     static float sineIn(float t, float b, float c, float d);
     static float sineOut(float t, float b, float c, float d);

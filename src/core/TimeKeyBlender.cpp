@@ -314,10 +314,6 @@ float getEasingRateFromTwoKeys(const TimeKeyGatherer& aGatherer) {
     const tKey* k0 = static_cast<const tKey*>(p0.key);
 
     const util::Easing::Param& easing = k0->data().easing();
-    if (easing.type == util::Easing::Type_Custom) {
-        const float cubicBezier = util::Easing::calculate(easing, -p0.relativeFrame, 0.0f, 1.0f, frame, true);
-        return cubicBezier;
-    }
     // calculate easing
     return util::Easing::calculate(easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
 }
