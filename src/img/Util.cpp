@@ -203,8 +203,10 @@ Util::createTextureImage(const PSDFormat::Header& aHeader, const PSDFormat::Laye
 
     // get image
     auto image = PSDUtil::makeInterleavedImage(aHeader, aLayer, PSDUtil::ColorFormat_RGBA8);
-    XC_PTR_ASSERT(image.data);
-
+    //XC_PTR_ASSERT(image.data);
+    if (image.data == nullptr) {
+        return std::pair<XCMemBlock, QRect>();
+    }
     QRect rect(aLayer.rect.left(), aLayer.rect.top(), aLayer.rect.width(), aLayer.rect.height());
 
     // modulate color bit
