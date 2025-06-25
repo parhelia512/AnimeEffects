@@ -1,8 +1,8 @@
-# 角度特效
+# AnimeEffects
 
 ## 下载
 
-|                                                                                                                                                               稳定的 (v1.6)                                                                                                                                                               |                                                                                                                                                                                     每晚一次                                                                                                                                                                                     |                                           源代码                                           |
+|                                                                                                                                                              稳定版本 (v1.6)                                                                                                                                                              |                                                                                                                                                                                     开发版本                                                                                                                                                                                     |                                           源代码                                           |
 | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------: |
 | [Windows](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.6/AnimeEffects-Installer-Windows.exe) - [MacOS](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.6/AnimeEffects-MacOS.zip) - [Linux](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.6/AnimeEffects-Linux.zip) | [Windows](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build-windows.yaml/master/AnimeEffects-Windows-x64.zip) - [MacOS](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_mac_intel.yaml/master/AnimeEffects-MacOS.zip) - [Linux](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_linux.yaml/master/AnimeEffects-Linux.zip) | [下载 ZIP](https://github.com/AnimeEffectsDevs/AnimeEffects/archive/refs/heads/master.zip) |
 
@@ -16,62 +16,59 @@
 
 ## 描述
 
-一个 2D 动画工具不需要经过仔细思考的计划，它通过提供基于多边形网格变形的各种函数来简化动画。<br>
-它最初是由藏身者开发的，现在正由其社区开发和维护。
+一款无需精心规划的 2D 动画工具，其通过基于多边形网格变形的各种功能来简化动画制作。<br>
+最早由 hidefuku 开发，现在其社区负责开发及维护。
 
-- 官方网站：<br>
-
+- 官方网站：
   - <https://animeeffectsdevs.github.io/>
+- 官方社群：
+  - Discord: [AnimeEffects](https://discord.gg/sKp8Srm)（感谢 [José Moreno](https://github.com/Jose-Moreno) 之支持）
+  - X (Twitter): [@anime_effect](https://x.com/anime_effects) （感谢 [p_yukusai](https://github.com/p-yukusai) 之支持）
+  - 红迪： [r/AnimeEffects](https://www.reddit.com/r/AnimeEffects/) （感谢 [visterical](https://www.tumblr.com/visterical) 之支持）
 
-- 官方社团：<br>
-
-  - Discord: <a href='https://discord.gg/sKp8Srm'>AnimeEffects</a> (礼遇[Joseassociated Moreno](https://github.com/Jose-Moreno))<br>
-  - X (Twitter): <a href='https://x.com/anime_effects'>@anime_effect</a> ( [p_yukusai](https://github.com/p-yukusai))<br>
-  - 红： <a href='https://www.reddit.com/r/AnimeEffects/'>r/AnimeEffects</a> (礼遇 [visterical](https://www.tumblr.com/visterical))<br>
-
-- 您可以通过以下方式支持我们：<br><br>
+- 您还可以通过以下方式支持我们：<br><br>
   [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V04YLC3) &nbsp;&nbsp; <a href="https://yukusai.itch.io/animeeffects" target="_blank"> <img src="https://static.itch.io/images/badge-color.svg" alt="itch.io" style="width:100px" /> </a>
 
-注意：目前可能有不兼容的更改，如果发生这些更改，将会在受影响的版本中公布。<br>
-**_如果你有任何问题或希望建议新的功能，请随时联系我们我们的社会！_**
+注意：目前可能会有不兼容的更改，如果发生此类更改，我们将在受影响的版本中予以说明。<br>
+**_如果你有任何问题或希望建议新的功能，随时通过社群联系我们！_**
 
 ## 发布
 
-AnimeEffects 一旦出现，将立即通知您可用的稳定释放。
+当新版本被发布时， AnimeEffects 将通过以下渠道来通知您可用的稳定版本。
 
-- 我们的稳定版本可用的 [here](https://github.com/AnimeEffectsDevs/AnimeEffects/releases)。<br>
-- 我们的不稳定版本可用的 [here](https://github.com/p-yukusai/AnimeEffects/releases)。<br>
-- 我们的夜间构建可用的 [here](https://github.com/AnimeEffectsDevs/AnimeEffects/actions)。
+- 我们可用的稳定版本[在这里](https://github.com/AnimeEffectsDevs/AnimeEffects/releases)。
+- 我们可用的不稳定版本[在这里](https://github.com/p-yukusai/AnimeEffects/releases)。
+- 我们可用的最新版本[在这里](https://github.com/AnimeEffectsDevs/AnimeEffects/actions)。
 
-## B. 所需经费
+## 设备要求
 
 - Windows/Linux/Mac
-  - 查看下面的兼容版本
+  - 具体查看下面的「适配系统」
 - 处理器： 64 位 CPU
 - RAM: 4 GB
-- 图像卡：GPU/iGPU 支持 OpenGL 4.0 或更高版本
-- [FFmpeg](https://ffmpeg.org/download.html) (视频导出的节能)。 您可以将其放置在您的路径上，或者复制到"/tools"文件夹 - 如果不存在它，请在可执行文件的同时创建此文件夹)
+- 显卡：支持 OpenGL 4.0 或更高版本的 GPU/iGPU
+- [FFmpeg](https://ffmpeg.org/download.html) （视频导出时需要用到。您可以将其注册到系统的环境变量上，或者复制到 `"/tools"` 文件夹——如果文件夹不存在，请在可执行文件的同级目录下创建此文件夹）
 
-## 操作系统目标
+## 适配系统
 
-#### 这是我们正在编译和测试软件，它可能会在旧版本上运行，但是这不是劝阻的。
+#### 这是我们通过编译和测试的版本，应用可能会在更旧的系统上运行，但我们并不鼓励这样做。
 
-- Windows 10 或更高版本
-- Ubuntu LTS 或类似磁盘。
-- MacOS 大南方或较新的
+- Windows 10（此版本即将终止支持，建议尽快升级或更换操作系统）或更高版本
+- Ubuntu LTS 或类似发行版
+- MacOS Monterey 或更高版本
 
-## B. 发展要求
+## 开发要求
 
 - Qt 6.6.X
-- Vulkan 头部
+- Vulkan Headers
 - CMake 3.16 或更高版本
-- MSVC/GCC/CLang (64 位)
+- MSVC/GCC/CLang （64 位）
 
 ## Linux (Debian)
 
-### 创建编译和应用图像
+### 编译和构建 AppImage
 
-- 这些依赖关系大多是不必要的，因为它们带着您的迪特罗，因此请检查您自己的软件包：
+- 大部分依赖项系统已自带，请对照检查你的软件包：
 
 ```
 sudo apt update && sudo apt upgrade -y
@@ -98,11 +95,11 @@ chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 chmod a+x AnimeEffects-x86_64.AppImage
 ```
 
-## 窗口
+## Windows
 
-### 编译和文件夹创建
+### 编译和构建文件夹
 
-- 安装步骤假定您已经通过安装程序安装了所有的要求，您的路径也有这些要求
+- 安装步骤假设你已通过安装程序完成所有必备组件的安装，并已添加至系统路径
 
 ```powershell
 git clone https://github.com/AnimeEffectsDevs/AnimeEffects
@@ -118,9 +115,9 @@ Copy-Item ".\AnimeEffects.exe" ".\AnimeEffects-Windows-x64\"
 
 ## MacOS
 
-### 编译和创建应用
+### 编译和构建 `.app`
 
-- 这些步骤假设您的系统上安装了 xcode、brew、wget、python 3 和 pip
+- 操作步骤假设你的系统已安装 xcode、brew、wget、python 3 和 pip
 
 ```bash
 brew install cmake ninja vulkan-headers
