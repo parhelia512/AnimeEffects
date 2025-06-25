@@ -6,7 +6,7 @@
     <message>
       <location filename="../../src/ctrl/bone/bone_BindNodesMode.cpp" line="78"/>
       <source>Bind node to bone</source>
-      <translation>绑定节点到骨骼</translation>
+      <translation>绑定骨骼到节点</translation>
     </message>
     <message>
       <location filename="../../src/ctrl/bone/bone_BindNodesMode.cpp" line="101"/>
