@@ -5,9 +5,9 @@
 #include "util/SelectArgs.h"
 #include "cmnd/ScopedMacro.h"
 #include "gui/prop/prop_Items.h"
-
+#include "gui/prop/splineWidget.h"
 #include "GUIResources.h"
-
+#include <QDialog>
 #include <QToolButton>
 
 namespace gui {
@@ -185,6 +185,10 @@ namespace prop {
         mCustomEasing->setToolTip(QCoreApplication::tr("Custom easing"));
         mCustomEasing->connect(mCustomEasing, &QToolButton::clicked, [=]() {
             mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
+            auto* splineWidgetClass = new Ui_splineWidget();
+            auto* splineWidget = new QDialog();
+            splineWidgetClass->setupUi(splineWidget);
+            splineWidget->exec();
             this->onEditingFinished();
         });
 

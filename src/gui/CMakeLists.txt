@@ -98,6 +98,8 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
     ${app_icon}
         AudioPlaybackWidget.cpp
         AudioPlaybackWidget.h
+        prop/splineWidget.cpp
+        prop/splineWidget.h
 )
 target_include_directories(${PROJECT_NAME} PRIVATE
     ..
