@@ -187,7 +187,7 @@ namespace prop {
             mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
             auto* splineWidgetClass = new Ui_splineWidget();
             auto* splineWidget = new QDialog();
-            splineWidgetClass->setupUi(splineWidget);
+            splineWidgetClass->setupUi(splineWidget, mGUIResources);
             splineWidget->exec();
             this->onEditingFinished();
         });

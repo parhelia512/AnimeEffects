@@ -96,10 +96,12 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
     tool/tool_SRTPanel.cpp tool/tool_SRTPanel.h
     tool/tool_ViewPanel.cpp tool/tool_ViewPanel.h
     ${app_icon}
-        AudioPlaybackWidget.cpp
-        AudioPlaybackWidget.h
-        prop/splineWidget.cpp
-        prop/splineWidget.h
+    AudioPlaybackWidget.cpp
+    AudioPlaybackWidget.h
+    prop/splineWidget.cpp
+    prop/splineWidget.h
+        prop/bezierCurveEditor.h
+        prop/bezierCurveEditor.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE
     ..

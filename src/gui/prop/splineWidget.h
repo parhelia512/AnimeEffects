@@ -9,6 +9,10 @@
 #ifndef DESIGNEROAYGQF_H
 #define DESIGNEROAYGQF_H
 
+#include "GUIResources.h"
+
+
+#include <qgraphicsview.h>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDoubleSpinBox>
@@ -17,8 +21,12 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QToolButton>
 #include <QtWidgets/QWidget>
+#include "gui/prop/bezierCurveEditor.h"
+
 
 QT_BEGIN_NAMESPACE
+
+
 
 class Ui_splineWidget
 {
@@ -28,14 +36,14 @@ public:
     QDoubleSpinBox *x2_spin;
     QDoubleSpinBox *y1_spin;
     QFrame *line;
-    QPushButton *splineChart;
+    BezierCurveEditor* m_editor;
     QToolButton *toolButton_2;
     QToolButton *toolButton;
     QDoubleSpinBox *y2_spin;
     QPushButton *cancel;
     QPushButton *apply;
 
-    void setupUi(QWidget *splineWidget)
+    void setupUi(QWidget *splineWidget, const gui::GUIResources* guiRes)
     {
         if (splineWidget->objectName().isEmpty())
             splineWidget->setObjectName("splineWidget");
@@ -64,15 +72,14 @@ public:
 
         gridLayout_2->addWidget(line, 1, 0, 1, 6);
 
-        splineChart = new QPushButton(splineWidget);
-        splineChart->setObjectName("splineChart");
+        m_editor = new BezierCurveEditor();
+        m_editor->setObjectName("splineChart");
         QSizePolicy sizePolicy(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::MinimumExpanding);
+        m_editor->setSizePolicy(sizePolicy);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(splineChart->sizePolicy().hasHeightForWidth());
-        splineChart->setSizePolicy(sizePolicy);
 
-        gridLayout_2->addWidget(splineChart, 0, 0, 1, 6);
+        gridLayout_2->addWidget(m_editor, 0, 0, 1, 6);
 
         toolButton_2 = new QToolButton(splineWidget);
         toolButton_2->setObjectName("toolButton_2");
@@ -108,7 +115,6 @@ public:
     void retranslateUi(QWidget *splineWidget)
     {
         splineWidget->setWindowTitle(QCoreApplication::translate("splineWidget", "Form", nullptr));
-        splineChart->setText(QCoreApplication::translate("splineWidget", "PushButton", nullptr));
         toolButton_2->setText(QCoreApplication::translate("splineWidget", "Paste", nullptr));
         toolButton->setText(QCoreApplication::translate("splineWidget", "Copy", nullptr));
         cancel->setText(QCoreApplication::translate("splineWidget", "Cancel", nullptr));
