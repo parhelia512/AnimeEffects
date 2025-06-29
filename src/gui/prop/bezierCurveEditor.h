@@ -1,18 +1,21 @@
 #ifndef BEZIERCURVEEDITOR_H
 #define BEZIERCURVEEDITOR_H
 
+#include "util/Easing.h"
 #include <QPen>
 #include <QBrush>
+#include <QDoubleSpinBox>
 #include <QWidget>
 
 class BezierCurveEditor : public QWidget
 {
     Q_OBJECT
 public:
-    explicit BezierCurveEditor(QWidget *parent = 0);
+    explicit BezierCurveEditor(QWidget *parent = nullptr, bool isDark = true, util::Easing::CubicBezier* cubicBezier = nullptr, QVector<QDoubleSpinBox*> spins = {});
     ~BezierCurveEditor();
+    util::Easing::CubicBezier* bezier;
+    QVector<QDoubleSpinBox*> spinBoxes;
 
-protected:
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *);
     void mousePressEvent(QMouseEvent *event);
@@ -23,7 +26,7 @@ protected:
 
     public slots:
 
-    private:
+    public:
     enum PointIndices {
         StartPoint = 0,
         ControlPoint1 = 1,
@@ -38,14 +41,14 @@ private:
         return sqrt(diff.x()*diff.x() + diff.y()*diff.y());
     }
 
-private:
+public:
     const int NUM_POINTS = 4;
     const qreal POINT_RADIUS = 4.0;
 
     QPointF         m_points[4];
     QPen            m_pens[4];
     QBrush          m_brushes[4];
-    Qt::GlobalColor m_colors[4];
+    QColor m_colors[4];
 
     QPen        m_curvePen;
 

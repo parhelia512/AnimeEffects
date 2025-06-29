@@ -155,6 +155,7 @@ namespace prop {
 
         QLayout* mLayout;
         std::array<QComboBox*, 2> mBox;
+        util::Easing::CubicBezier mCubicBezier;
         DoubleSpinBox* mDBox;
         util::Easing::Param mStamp;
         QToolButton* mCustomEasing;

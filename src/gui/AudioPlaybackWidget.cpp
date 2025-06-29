@@ -57,7 +57,7 @@ bool AudioPlaybackWidget::deserialize(const QJsonObject& pConf, std::vector<audi
 }
 
 void AudioPlaybackWidget::aPlayer(std::vector<audioConfig>* pConf, bool play, mediaState* state, int fps, int curFrame, int frameCount){
-    qDebug("Media player requested");
+    //qDebug("Media player requested");
     int x = 0;
     for(auto conf: *pConf){
         if(state->players.size() < x + 1 && state->outputs.size() < x + 1){
@@ -78,9 +78,9 @@ void AudioPlaybackWidget::aPlayer(std::vector<audioConfig>* pConf, bool play, me
         }
         if(output->volume() != getVol(config.volume)){ output->setVolume(getVol(config.volume)); }
         correctTrackPos(player, curFrame, frameCount, fps, const_cast<audioConfig&>(config));
-        qDebug("---");
-        qDebug() << "x = " << x << "; track = " << player->source() << "; current playback state = " << player->playbackState() << "; play = " << play;
-        qDebug("---");
+        //qDebug("---");
+        //qDebug() << "x = " << x << "; track = " << player->source() << "; current playback state = " << player->playbackState() << "; play = " << play;
+        //qDebug("---");
         if(!play){ player->stop(); state->playing = false;}
         if(play && config.startFrame < curFrame && config.endFrame > curFrame && config.playbackEnable){
             player->play();

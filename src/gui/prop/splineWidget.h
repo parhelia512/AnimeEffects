@@ -10,6 +10,7 @@
 #define DESIGNEROAYGQF_H
 
 #include "GUIResources.h"
+#include "core/Bone2.h"
 
 
 #include <qgraphicsview.h>
@@ -22,7 +23,7 @@
 #include <QtWidgets/QToolButton>
 #include <QtWidgets/QWidget>
 #include "gui/prop/bezierCurveEditor.h"
-
+#include "util/Easing.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -37,14 +38,17 @@ public:
     QDoubleSpinBox *y1_spin;
     QFrame *line;
     BezierCurveEditor* m_editor;
+    util::Easing::CubicBezier* bezier;
     QToolButton *toolButton_2;
     QToolButton *toolButton;
     QDoubleSpinBox *y2_spin;
     QPushButton *cancel;
     QPushButton *apply;
+    QVector<QDoubleSpinBox*> spins;
 
-    void setupUi(QWidget *splineWidget, const gui::GUIResources* guiRes)
+    void setupUi(QWidget *splineWidget, const gui::GUIResources* guiRes, util::Easing::CubicBezier* cubicBezier)
     {
+        bezier = cubicBezier;
         if (splineWidget->objectName().isEmpty())
             splineWidget->setObjectName("splineWidget");
         splineWidget->resize(600, 400);
@@ -72,7 +76,29 @@ public:
 
         gridLayout_2->addWidget(line, 1, 0, 1, 6);
 
-        m_editor = new BezierCurveEditor();
+
+        y2_spin = new QDoubleSpinBox(splineWidget);
+        y2_spin->setObjectName("y2_spin");
+
+        gridLayout_2->addWidget(y2_spin, 3, 4, 1, 1);
+
+        spins = {x1_spin, y1_spin, x2_spin, y2_spin};
+        m_editor = new BezierCurveEditor(splineWidget, guiRes->mTheme.isDark(), cubicBezier, spins);
+        for (auto spin : spins) {
+            spin->setSingleStep(0.01);
+            QDoubleSpinBox::connect(spin, &QDoubleSpinBox::valueChanged, [=](double) {
+                *m_editor->bezier = {(float)x1_spin->value(), (float)y1_spin->value(),
+                    (float)x2_spin->value(), (float)y2_spin->value()};
+                // TODO, add conversion from spinbox to point and add it to the initialization step so we can see...
+                // TODO, ...what the fuck we're doing inside the widget
+            });
+        }
+
+        x1_spin->setValue(cubicBezier->x1);
+        x2_spin->setValue(cubicBezier->x2);
+        y1_spin->setValue(cubicBezier->y1);
+        y2_spin->setValue(cubicBezier->y2);
+
         m_editor->setObjectName("splineChart");
         QSizePolicy sizePolicy(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::MinimumExpanding);
         m_editor->setSizePolicy(sizePolicy);
@@ -90,11 +116,6 @@ public:
         toolButton->setObjectName("toolButton");
 
         gridLayout_2->addWidget(toolButton, 3, 0, 1, 1);
-
-        y2_spin = new QDoubleSpinBox(splineWidget);
-        y2_spin->setObjectName("y2_spin");
-
-        gridLayout_2->addWidget(y2_spin, 3, 4, 1, 1);
 
         cancel = new QPushButton(splineWidget);
         cancel->setObjectName("cancel");
@@ -114,7 +135,7 @@ public:
 
     void retranslateUi(QWidget *splineWidget)
     {
-        splineWidget->setWindowTitle(QCoreApplication::translate("splineWidget", "Form", nullptr));
+        splineWidget->setWindowTitle(QCoreApplication::translate("splineWidget", "Bezier editor", nullptr));
         toolButton_2->setText(QCoreApplication::translate("splineWidget", "Paste", nullptr));
         toolButton->setText(QCoreApplication::translate("splineWidget", "Copy", nullptr));
         cancel->setText(QCoreApplication::translate("splineWidget", "Cancel", nullptr));

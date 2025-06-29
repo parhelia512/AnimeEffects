@@ -7,6 +7,8 @@
 #include "gui/prop/prop_Items.h"
 #include "gui/prop/splineWidget.h"
 #include "GUIResources.h"
+#include "util/Easing.h"
+
 #include <QDialog>
 #include <QToolButton>
 
@@ -147,6 +149,10 @@ namespace prop {
         mSignal = true;
     }
 
+    float invert (const int min, const int max, const float value) {
+        return static_cast<float>(max) - value + static_cast<float>(min);
+    }
+
     //-------------------------------------------------------------------------------------------------
     EasingItem::EasingItem(QWidget* aParent, const GUIResources* mGUIResources): mLayout(), mBox(), mDBox(), mStamp(), mSignal(true) {
         mLayout = new QHBoxLayout();
@@ -187,9 +193,18 @@ namespace prop {
             mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
             auto* splineWidgetClass = new Ui_splineWidget();
             auto* splineWidget = new QDialog();
-            splineWidgetClass->setupUi(splineWidget, mGUIResources);
+            auto* cubicBezier = new util::Easing::CubicBezier;
+            splineWidgetClass->setupUi(splineWidget, mGUIResources, cubicBezier);
             splineWidget->exec();
-            this->onEditingFinished();
+            // Invert results as our curve is inverted
+            /*int width = splineWidgetClass->m_editor->width();
+            int height = splineWidgetClass->m_editor->height();
+            cubicBezier->x1 = invert(0, width, cubicBezier->x1);
+            cubicBezier->x2 = invert(0, width, cubicBezier->x2);
+            cubicBezier->y1 = invert(0, height, cubicBezier->y1);
+            cubicBezier->y2 = invert(0, height, cubicBezier->y2);*/
+            mCubicBezier = *cubicBezier;
+            onValueUpdated(mStamp, value());
         });
 
         mStamp = value();
@@ -223,7 +238,7 @@ namespace prop {
         param.type = (util::Easing::Type)mBox[0]->currentIndex();
         param.range = (util::Easing::Range)mBox[1]->currentIndex();
         param.weight = mDBox->value();
-        param.cubicBezier = {1, 0, 0, 1};
+        param.cubicBezier = mCubicBezier;
         return param;
     }
 
@@ -232,6 +247,7 @@ namespace prop {
         mBox[0]->setCurrentIndex(aValue.type);
         mBox[1]->setCurrentIndex(aValue.range);
         mDBox->setValue(aValue.weight);
+        mCubicBezier = aValue.cubicBezier;
         mStamp = aValue;
         mSignal = true;
     }
