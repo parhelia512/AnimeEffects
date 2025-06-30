@@ -188,9 +188,9 @@ namespace prop {
             mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
             auto* splineWidgetClass = new Ui_splineWidget();
             auto* splineWidget = new QDialog();
-            auto* cubicBezier = new util::Easing::CubicBezier;
+            auto* cubicBezier = new util::Easing::CubicBezier(mCubicBezier);
             splineWidgetClass->setupUi(splineWidget, mGUIResources, cubicBezier);
-            auto result = splineWidget->exec();
+            const auto result = splineWidget->exec();
             if (result == QDialog::Accepted) {
                 mCubicBezier = *cubicBezier;
                 onValueUpdated(mStamp, value());

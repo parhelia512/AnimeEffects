@@ -10,8 +10,8 @@
 float normalize(const float val, const int min, const int max) {
     return (val - static_cast<float>(min)) / static_cast<float>(max - min);
 }
-float denormalize(const float val, const int range) {
-    return val * static_cast<float>(range - 20);
+float denormalize (const float var, const int min, const int max) {
+    return var * static_cast<float>(max - min) + static_cast<float>(min);
 }
 float invert (const int min, const int max, const float value) {
     return static_cast<float>(max) - value + static_cast<float>(min);
@@ -77,8 +77,10 @@ void BezierCurveEditor::mouseReleaseEvent(QMouseEvent *)
 void BezierCurveEditor::resizeEvent(QResizeEvent *)
 {
     m_points[StartPoint]    = QPointF(20, height() - 20);
-    m_points[ControlPoint1] = QPointF(width() - 20, height() - 20);
-    m_points[ControlPoint2] = QPointF(20, 20);
+    const QPointF points1 = { denormalize(bezier->x1, 20, width() - 20), denormalize(invert(0, 1, bezier->y1), 20, height() - 20 ) };
+    const QPointF points2 = { denormalize(bezier->x2, 20, width() - 20),denormalize(invert(0, 1, bezier->y2), 20, height() - 20) };
+    m_points[1] = points1;
+    m_points[2] = points2;
     m_points[EndPoint]      = QPointF(width() - 20, 20);
 }
 

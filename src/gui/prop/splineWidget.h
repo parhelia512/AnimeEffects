@@ -107,21 +107,17 @@ public:
                 int height = m_editor->height();
                 // TODO: Fix this
                 QPointF points1 = {
-                    denormalize(cubicBezier->x1, 0, width - 20),
-                    denormalize(invert(0, 1, cubicBezier->y1), 0, height -20)};
+                    denormalize(cubicBezier->x1, 20, width - 20),
+                    denormalize(invert(0, 1, cubicBezier->y1), 20, height -20)};
                 QPointF points2 = {
-                    denormalize(cubicBezier->x2, 0, width - 20),
-                    denormalize(invert(0, 1, cubicBezier->y2), 0, height - 20)};
+                    denormalize(cubicBezier->x2, 20, width - 20),
+                    denormalize(invert(0, 1, cubicBezier->y2), 20, height - 20)};
                 m_editor->m_points[1] = points1;
                 m_editor->m_points[2] = points2;
                 m_editor->blockSignals(false);
                 m_editor->repaint();
             });
         }
-        spins[0]->setValue(bezier->x1);
-        spins[1]->setValue(bezier->y1);
-        spins[2]->setValue(bezier->x2);
-        spins[3]->setValue(bezier->y2);
 
         m_editor->setObjectName("splineChart");
         QSizePolicy sizePolicy(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::MinimumExpanding);
