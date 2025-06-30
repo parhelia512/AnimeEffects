@@ -43,12 +43,12 @@ private:
 
 public:
     const int NUM_POINTS = 4;
-    const qreal POINT_RADIUS = 4.0;
+    const qreal POINT_RADIUS = 6.0;
 
     QPointF         m_points[4];
     QPen            m_pens[4];
     QBrush          m_brushes[4];
-    QColor m_colors[4];
+    QColor          m_colors[4];
 
     QPen        m_curvePen;
 

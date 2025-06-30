@@ -14,20 +14,15 @@
 
 
 #include <qgraphicsview.h>
-#include <QtCore/QVariant>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QToolButton>
-#include <QtWidgets/QWidget>
+#include <QtWidgets/QDialog>
 #include "gui/prop/bezierCurveEditor.h"
 #include "util/Easing.h"
 
 QT_BEGIN_NAMESPACE
-
-
 
 class Ui_splineWidget
 {
@@ -46,12 +41,25 @@ public:
     QPushButton *apply;
     QVector<QDoubleSpinBox*> spins;
 
-    void setupUi(QWidget *splineWidget, const gui::GUIResources* guiRes, util::Easing::CubicBezier* cubicBezier)
+
+    static float denormalize (const float var, const int min, const int max) {
+        return var * static_cast<float>(max - min) + static_cast<float>(min);
+    }
+
+    static float normalize (const float var, const int min, const int max) {
+        return (var - static_cast<float>(min)) / static_cast<float>(max - min);
+    }
+
+    static float invert (const int min, const int max, const float value) {
+        return static_cast<float>(max) - value + static_cast<float>(min);
+    }
+
+    void setupUi(QDialog *splineWidget, const gui::GUIResources* guiRes, util::Easing::CubicBezier* cubicBezier)
     {
         bezier = cubicBezier;
         if (splineWidget->objectName().isEmpty())
             splineWidget->setObjectName("splineWidget");
-        splineWidget->resize(600, 400);
+        splineWidget->resize(400, 400);
         gridLayout_2 = new QGridLayout(splineWidget);
         gridLayout_2->setObjectName("gridLayout_2");
         x1_spin = new QDoubleSpinBox(splineWidget);
@@ -87,17 +95,33 @@ public:
         for (auto spin : spins) {
             spin->setSingleStep(0.01);
             QDoubleSpinBox::connect(spin, &QDoubleSpinBox::valueChanged, [=](double) {
-                *m_editor->bezier = {(float)x1_spin->value(), (float)y1_spin->value(),
-                    (float)x2_spin->value(), (float)y2_spin->value()};
-                // TODO, add conversion from spinbox to point and add it to the initialization step so we can see...
-                // TODO, ...what the fuck we're doing inside the widget
+                m_editor->blockSignals(true);
+                *cubicBezier = {
+                    static_cast<float>(spins[0]->value()),
+                    static_cast<float>(spins[1]->value()),
+                    static_cast<float>(spins[2]->value()),
+                    static_cast<float>(spins[3]->value())
+                };
+                m_editor->bezier = cubicBezier;
+                int width = m_editor->width();
+                int height = m_editor->height();
+                // TODO: Fix this
+                QPointF points1 = {
+                    denormalize(cubicBezier->x1, 0, width - 20),
+                    denormalize(invert(0, 1, cubicBezier->y1), 0, height -20)};
+                QPointF points2 = {
+                    denormalize(cubicBezier->x2, 0, width - 20),
+                    denormalize(invert(0, 1, cubicBezier->y2), 0, height - 20)};
+                m_editor->m_points[1] = points1;
+                m_editor->m_points[2] = points2;
+                m_editor->blockSignals(false);
+                m_editor->repaint();
             });
         }
-
-        x1_spin->setValue(cubicBezier->x1);
-        x2_spin->setValue(cubicBezier->x2);
-        y1_spin->setValue(cubicBezier->y1);
-        y2_spin->setValue(cubicBezier->y2);
+        spins[0]->setValue(bezier->x1);
+        spins[1]->setValue(bezier->y1);
+        spins[2]->setValue(bezier->x2);
+        spins[3]->setValue(bezier->y2);
 
         m_editor->setObjectName("splineChart");
         QSizePolicy sizePolicy(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::MinimumExpanding);
@@ -120,10 +144,18 @@ public:
         cancel = new QPushButton(splineWidget);
         cancel->setObjectName("cancel");
 
+        cancel->connect(cancel, &QPushButton::clicked, [=]() {
+            splineWidget->reject();
+        });
+
         gridLayout_2->addWidget(cancel, 6, 0, 1, 3);
 
         apply = new QPushButton(splineWidget);
         apply->setObjectName("apply");
+
+        apply->connect(apply, &QPushButton::clicked, [=]() {
+            splineWidget->accept();
+        });
 
         gridLayout_2->addWidget(apply, 6, 3, 1, 3);
 

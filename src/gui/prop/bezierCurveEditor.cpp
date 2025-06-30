@@ -7,8 +7,8 @@
 #include <filesystem>
 #include <utility>
 
-float normalize(const float val, const int range) {
-    return val / static_cast<float>(range);
+float normalize(const float val, const int min, const int max) {
+    return (val - static_cast<float>(min)) / static_cast<float>(max - min);
 }
 float denormalize(const float val, const int range) {
     return val * static_cast<float>(range - 20);
@@ -51,10 +51,12 @@ BezierCurveEditor::~BezierCurveEditor()
 void BezierCurveEditor::mousePressEvent(QMouseEvent *event)
 {
     for(int i = 0; i < NUM_POINTS; i++) {
-        if(distance(m_points[i], event->pos()) <= POINT_RADIUS) {
-            m_selectedPoint = i;
-            m_dragging = true;
-            break;
+        if (i != StartPoint && i != EndPoint) {
+            if(distance(m_points[i], event->pos()) <= POINT_RADIUS) {
+                m_selectedPoint = i;
+                m_dragging = true;
+                break;
+            }
         }
     }
 }
@@ -78,25 +80,29 @@ void BezierCurveEditor::resizeEvent(QResizeEvent *)
     m_points[ControlPoint1] = QPointF(width() - 20, height() - 20);
     m_points[ControlPoint2] = QPointF(20, 20);
     m_points[EndPoint]      = QPointF(width() - 20, 20);
-    repaint();
 }
 
 void BezierCurveEditor::paintEvent(QPaintEvent *)
 {
-    // Points are not meant to be moved for any reason
+    // Points are not meant to be moved for any reason as that would break the calculations
     m_points[StartPoint]    = QPointF(20, height() - 20);
     m_points[EndPoint]      = QPointF(width() - 20, 20);
-    // This would break the calculations
+    // We clamp to not go outside the widget
+
+    m_points[ControlPoint1].setX(std::clamp(m_points[ControlPoint1].x(), qreal(20), qreal(width() - 20)));
+    m_points[ControlPoint1].setY(std::clamp(m_points[ControlPoint1].y(), qreal(20), qreal(height() - 20)));
+    m_points[ControlPoint2].setX(std::clamp(m_points[ControlPoint2].x(), qreal(20), qreal(width() - 20)));
+    m_points[ControlPoint2].setY(std::clamp(m_points[ControlPoint2].y(), qreal(20), qreal(height() -20)));
 
     // We normalize these because the points are not lower-left 0 and upper-right 1, also, we need to inverse the Y points
     // because the Y axis is inverted in the GUI
-    bezier->x1 = normalize(m_points[ControlPoint1].x() + 20.0, width());
+    bezier->x1 = normalize(m_points[ControlPoint1].x(), 20, width() - 20);
     const auto inverted_y1 = invert(0, height(), m_points[ControlPoint1].y());
-    bezier->y1 = normalize(inverted_y1 - 20.0, height());
+    bezier->y1 = normalize(inverted_y1, 20, height() - 20);
 
-    bezier->x2 = normalize(m_points[ControlPoint2].x() - 20.0, width());
+    bezier->x2 = normalize(m_points[ControlPoint2].x(), 20, width() -20);
     const auto inverted_y2 = invert(0, height(), m_points[ControlPoint2].y());
-    bezier->y2 = normalize(inverted_y2 + 20.0, height());
+    bezier->y2 = normalize(inverted_y2, 20, height() -20);
 
     if (!spinBoxes.empty() && spinBoxes.at(0)) {
         for (auto box : spinBoxes) {
@@ -122,8 +128,16 @@ void BezierCurveEditor::paintEvent(QPaintEvent *)
     painter.drawPath(path);
 
     for (int i = 0; i < NUM_POINTS; i++) {
-        painter.setPen(m_pens[i]);
-        painter.setBrush(m_brushes[i]);
-        painter.drawEllipse(m_points[i], POINT_RADIUS, POINT_RADIUS);
+        if (i == StartPoint || i == EndPoint) {
+            m_brushes[i].setStyle(Qt::BrushStyle::NoBrush);
+            painter.setPen(m_pens[i]);
+            painter.setBrush(m_brushes[i]);
+            painter.drawEllipse(m_points[i], 3.0, 3.0);
+        }
+        else{
+            painter.setPen(m_pens[i]);
+            painter.setBrush(m_brushes[i]);
+            painter.drawEllipse(m_points[i], POINT_RADIUS, POINT_RADIUS);
+        }
     }
 }
