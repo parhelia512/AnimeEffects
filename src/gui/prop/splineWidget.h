@@ -20,7 +20,10 @@
 #include <QtWidgets/QToolButton>
 #include <QtWidgets/QDialog>
 #include "gui/prop/bezierCurveEditor.h"
+#include "tool/tool_FFDPanel.h"
 #include "util/Easing.h"
+
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 
@@ -105,7 +108,6 @@ public:
                 m_editor->bezier = cubicBezier;
                 int width = m_editor->width();
                 int height = m_editor->height();
-                // TODO: Fix this
                 QPointF points1 = {
                     denormalize(cubicBezier->x1, 20, width - 20),
                     denormalize(invert(0, 1, cubicBezier->y1), 20, height -20)};
@@ -127,13 +129,43 @@ public:
 
         gridLayout_2->addWidget(m_editor, 0, 0, 1, 6);
 
+        // Copy
+        toolButton = new QToolButton(splineWidget);
+        toolButton->setObjectName("toolButton");
+        //Paste
         toolButton_2 = new QToolButton(splineWidget);
         toolButton_2->setObjectName("toolButton_2");
+        QToolButton::connect(toolButton, &QToolButton::clicked, [=]() {
+            QString str;
+            str.append(QString::number(bezier->x1)).append(",");
+            str.append(QString::number(bezier->y1)).append(",");
+            str.append(QString::number(bezier->x2)).append(",");
+            str.append(QString::number(bezier->y2));
+            QClipboard *clip = QGuiApplication::clipboard();
+            clip->setText(str);
+            QMessageBox::information(splineWidget, "Copied", "Copied bezier to clipboard");
+        });
 
         gridLayout_2->addWidget(toolButton_2, 3, 5, 1, 1);
 
-        toolButton = new QToolButton(splineWidget);
-        toolButton->setObjectName("toolButton");
+        QToolButton::connect(toolButton_2, &QToolButton::clicked, [=]() {
+            QClipboard *clip = QGuiApplication::clipboard();
+            QStringList list = clip->text().split(",");
+            if (!list.isEmpty() && list.size() == 4) {
+                bezier->x1 = list[0].toFloat();
+                bezier->y1 = list[1].toFloat();
+                bezier->x2 = list[2].toFloat();
+                bezier->y2 = list[3].toFloat();
+                spins[0]->setValue(bezier->x1);
+                spins[1]->setValue(bezier->y1);
+                spins[2]->setValue(bezier->x2);
+                spins[3]->setValue(bezier->y2);
+            }
+            else {
+                QMessageBox::information(splineWidget, "Error", "Invalid clipboard data");
+            }
+        });
+
 
         gridLayout_2->addWidget(toolButton, 3, 0, 1, 1);
 

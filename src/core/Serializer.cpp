@@ -85,6 +85,10 @@ void Serializer::write(const util::Easing::Param& aValue) {
     mOut.write((sint32)aValue.type);
     mOut.write((sint32)aValue.range);
     mOut.write((float32)aValue.weight);
+    mOut.write((float32)aValue.cubicBezier.x1);
+    mOut.write((float32)aValue.cubicBezier.y1);
+    mOut.write((float32)aValue.cubicBezier.x2);
+    mOut.write((float32)aValue.cubicBezier.y2);
 }
 
 void Serializer::write(const QPolygonF& aValue) {
