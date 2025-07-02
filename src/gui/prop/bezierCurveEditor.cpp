@@ -1,5 +1,4 @@
-#include "beziercurveeditor.h"
-
+#include "gui/prop/bezierCurveEditor.h"
 #include <QDoubleSpinBox>
 #include <QPainterPath>
 #include <QPainter>
