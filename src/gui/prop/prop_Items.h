@@ -153,12 +153,12 @@ namespace prop {
     private:
         void onEditingFinished();
 
-        QLayout* mLayout;
+        QGridLayout* mLayout;
         std::array<QComboBox*, 2> mBox;
         util::Easing::CubicBezier mCubicBezier;
         DoubleSpinBox* mDBox;
         util::Easing::Param mStamp;
-        QToolButton* mCustomEasing;
+        QPushButton* mCustomEasing;
         bool mSignal;
     };
 

@@ -150,11 +150,11 @@ namespace prop {
 
     //-------------------------------------------------------------------------------------------------
     EasingItem::EasingItem(QWidget* aParent, const GUIResources* mGUIResources): mLayout(), mBox(), mDBox(), mStamp(), mSignal(true) {
-        mLayout = new QHBoxLayout();
+        mLayout = new QGridLayout();
 
         for (int i = 0; i < 2; ++i) {
             mBox[i] = new QComboBox(aParent);
-            mLayout->addWidget(mBox[i]);
+            mLayout->addWidget(mBox[i], 0, i);
             mBox[i]->connect(mBox[i], util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]() {
                 this->onEditingFinished();
                 mBox[i]->clearFocus();
@@ -162,7 +162,7 @@ namespace prop {
         }
 
         mDBox = new DoubleSpinBox(aParent);
-        mLayout->addWidget(mDBox);
+        mLayout->addWidget(mDBox, 1, 0);
         mDBox->connect(mDBox, &QAbstractSpinBox::editingFinished, [=]() {
             this->onEditingFinished();
             if (!mDBox->mTriggeredByArrows) {
@@ -180,9 +180,10 @@ namespace prop {
         mDBox->setSingleStep(0.1);
 
         // Custom spline
-        mCustomEasing = new QToolButton;
-        mLayout->addWidget(mCustomEasing);
+        mCustomEasing = new QPushButton;
+        mLayout->addWidget(mCustomEasing, 1, 1, 1, 3);
         mCustomEasing->setIcon(mGUIResources->icon("ease"));
+        mCustomEasing->setText(QCoreApplication::tr("Custom easing"));
         mCustomEasing->setToolTip(QCoreApplication::tr("Custom easing"));
         mCustomEasing->connect(mCustomEasing, &QToolButton::clicked, [=]() {
             mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
