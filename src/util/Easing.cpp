@@ -223,7 +223,6 @@ float calculateBezier(const Easing::Param& aParam, const float t, const float b,
     return static_cast<float>(bezier);
 }
 
-
 float Easing::calculate(const Param& aParam, const float t, const float b, const float c, const float d) {
     // Param, relative frame, 0, 1, current frame, is bezier?
     if (aParam.type == Type_Custom) {

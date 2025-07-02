@@ -109,7 +109,7 @@ public:
                 int width = m_editor->width();
                 int height = m_editor->height();
                 QPointF points1 = {
-                    denormalize(cubicBezier->x1, 20, width - 20),
+                    denormalize(cubicBezier->x1, 20, width - 20), 
                     denormalize(invert(0, 1, cubicBezier->y1), 20, height -20)};
                 QPointF points2 = {
                     denormalize(cubicBezier->x2, 20, width - 20),

@@ -11,6 +11,7 @@
 #include "util/NetworkUtil.h"
 #include <set>
 #include <utility>
+#include <QComboBox>
 // This thing is held by duct tape and OOP hell I swear...
 #include "ctrl/ExportParams.h"
 

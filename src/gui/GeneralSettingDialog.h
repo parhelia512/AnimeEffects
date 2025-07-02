@@ -5,8 +5,9 @@
 #include <QCheckBox>
 #include <QFormLayout>
 #include "gui/EasyDialog.h"
-#include "qspinbox.h"
+#include <QSpinBox>
 #include <QTabWidget>
+#include <QComboBox>
 
 namespace gui {
 

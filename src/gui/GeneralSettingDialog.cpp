@@ -2,8 +2,8 @@
 #include <qstandardpaths.h>
 #include "MainWindow.h"
 #include "gui/GeneralSettingDialog.h"
-
 #include "util/NetworkUtil.h"
+#include <QComboBox>
 
 namespace {
 
@@ -754,7 +754,7 @@ QString GeneralSettingDialog::getFFmpeg() {
     }
     return ffmpeg;
 }
-void GeneralSettingDialog::ffmpegCheckFailed(gui::GeneralSettingDialog* aDialog) {
+void GeneralSettingDialog::ffmpegCheckFailed(GeneralSettingDialog* aDialog) {
     QMessageBox message;
     message.setIcon(QMessageBox::Warning);
     message.setText(tr("FFmpeg was not found."));
@@ -781,7 +781,7 @@ bool GeneralSettingDialog::ffmpegCheck(const QString& ffmpeg, GeneralSettingDial
     const bool libExists = util::NetworkUtil::libExists(ffmpeg, "-version");
     const bool pathExists = util::NetworkUtil::libExists("ffmpeg");
 
-    if (!libExists || !pathExists) {
+    if (!libExists && !pathExists) {
         return false;
     }
     // Test FFmpeg functionality
