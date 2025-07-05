@@ -1,6 +1,8 @@
 #ifndef CTRL_IMAGEFILELOADER_H
 #define CTRL_IMAGEFILELOADER_H
 
+#define NEW_ORA_PARSER
+
 #include <QFileInfo>
 #include <QString>
 #include <QScopedPointer>
@@ -10,8 +12,9 @@
 #include "core/ObjectTree.h"
 #include "img/Util.h"
 #include "core/FolderNode.h"
+#ifdef OLD_ORA_PARSER
 #include "img/ORAReader.h"
-
+#endif
 
 namespace ctrl {
 

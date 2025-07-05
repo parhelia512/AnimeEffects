@@ -5,8 +5,12 @@
 #include "img/PSDUtil.h"
 #include "img/BlendMode.h"
 #include "img/Util.h"
+
+#include "oraParser.h"
 #include "deps/zip_file.h"
 #include "gui/res/res_ResourceUpdater.h"
+
+#include <QMessageBox>
 
 namespace img {
 
@@ -312,10 +316,28 @@ ResourceNode* Util::createResourceNodes(bool merged, const std::string& aFilePat
         QImage image = QImage::fromData(imageBytes);
         return createResourceNode(image, QFileInfo(QString::fromStdString(aFilePath)).baseName(), aLoadImage);
     }
-    else{
-        Q_UNIMPLEMENTED();
+    oraParser reader = oraParser(&ora);
+    if (!reader.initialize()) {
+        return nullptr;
     }
-    return nullptr;
+    reader.printSelf();
+    // helpers
+    auto image = reader.oraImage.image;
+    auto layers = reader.oraImage.layers;
+    int* progress = new int{0};
+    auto canvasSize = QSize(image.width, image.height);
+    QImage img = QImage::fromData(QByteArray::fromStdString(ora.read("mergedimage.png")));
+    if (img.isNull()) {
+        qDebug() <<
+            "Unable to get data from merged image, the file is either corrupted or does not follow the "
+            "openRaster spec.";
+        return nullptr;
+    }
+    if (img.size() != QSize(image.width, image.height)) {
+        qDebug() << "Merged image size is not equal to the size declared on stack.xml, invalid file.";
+        return nullptr;
+    }
+    QMessageBox::information(nullptr, "Info", "Not supported yet, please remind your local scatterbrain developer!");
 }
 
 ResourceNode* Util::createResourceNode(const QImage& aImage, const QString& aName, bool aLoadImage) {
