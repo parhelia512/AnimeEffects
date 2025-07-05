@@ -316,6 +316,7 @@ ResourceNode* Util::createResourceNodes(bool merged, const std::string& aFilePat
         QImage image = QImage::fromData(imageBytes);
         return createResourceNode(image, QFileInfo(QString::fromStdString(aFilePath)).baseName(), aLoadImage);
     }
+    // TODO: Fix later
     oraParser reader = oraParser(&ora);
     if (!reader.initialize()) {
         return nullptr;
@@ -324,8 +325,6 @@ ResourceNode* Util::createResourceNodes(bool merged, const std::string& aFilePat
     // helpers
     auto image = reader.oraImage.image;
     auto layers = reader.oraImage.layers;
-    int* progress = new int{0};
-    auto canvasSize = QSize(image.width, image.height);
     QImage img = QImage::fromData(QByteArray::fromStdString(ora.read("mergedimage.png")));
     if (img.isNull()) {
         qDebug() <<
@@ -337,7 +336,74 @@ ResourceNode* Util::createResourceNodes(bool merged, const std::string& aFilePat
         qDebug() << "Merged image size is not equal to the size declared on stack.xml, invalid file.";
         return nullptr;
     }
-    QMessageBox::information(nullptr, "Info", "Not supported yet, please remind your local scatterbrain developer!");
+
+    // resource tree stack
+    std::vector<ResourceNode*> resStack;
+    resStack.push_back(new ResourceNode("topnode"));
+
+    ResourceNode* resCurrent = resStack.back();
+    XC_PTR_ASSERT(resCurrent);
+
+    QVector<int> skipped;
+    QVector<ResourceNode*> resPrev;
+    // each layer
+    for (auto itr = layers.rbegin(); itr != layers.rend(); ++itr) {
+        if (!skipped.empty()) {
+            skipped.back() -= 1;
+            if (skipped.back() == 0) {
+                resCurrent = resPrev.back();
+                skipped.pop_back();
+                resPrev.pop_back();
+            }
+        }
+        auto& layer = *itr;
+        const QString name = layer.name.c_str();
+        QRect rect(layer.rect.left(), layer.rect.top(), layer.rect.width(), layer.rect.height());
+
+        if (layer.type == IMAGE) {
+            // create resource
+            auto resNode = new ResourceNode(name);
+            resNode->data().setPos(rect.topLeft());
+            resNode->data().setUserData(&layer);
+            resNode->data().setIsLayer(true);
+            resNode->data().setBlendMode(oraParser::oraBlendToPSDBlend(layer.composite.blend));
+            resNode->data().setIsVisible(layer.isVisible);
+
+            if (aLoadImage) {
+                auto img_aLoad = createTextureImage(layer.image);
+                resNode->data().setPos(img_aLoad.second.topLeft());
+                resNode->data().grabImage(img_aLoad.first, img_aLoad.second.size(), Format_RGBA8);
+            } else {
+                auto layerPtr = &layer;
+
+                resNode->data().setImageLoader([=](ResourceData& aData) -> bool {
+                    auto img_load = createTextureImage(layerPtr->image);
+                    aData.setPos(img_load.second.topLeft());
+                    aData.grabImage(img_load.first, img_load.second.size(), Format_RGBA8);
+                    return true;
+                });
+            }
+
+            // push tree
+            resCurrent->children().pushBack(resNode);
+        } else {
+            resPrev.append(resCurrent);
+            skipped.append(0);
+            // create resource
+            auto resNode = new ResourceNode(name);
+            resNode->data().setPos(rect.topLeft());
+            resNode->data().setUserData(&layer);
+            resNode->data().setIsLayer(false);
+            resCurrent->children().pushBack(resNode);
+
+            // push tree
+            resStack.push_back(resNode);
+            skipped.back() = layer.capacity + 1;
+            // update vars
+            resCurrent = resStack.back();
+        }
+    }
+    return resStack.front();
 }
 
 ResourceNode* Util::createResourceNode(const QImage& aImage, const QString& aName, bool aLoadImage) {

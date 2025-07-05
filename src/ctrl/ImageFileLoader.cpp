@@ -501,19 +501,25 @@ bool ImageFileLoader::loadOra(Project& aProject, util::IProgressReporter& aRepor
         aProject.resourceHolder().pushImageTree(*resStack.back(), mFileInfo.absoluteFilePath());
         // Parse mainStack
         aReporter.setProgress(*progress);
-        int skipped = 0;
-        FolderNode* prev = treeStack.back();
+        QVector<int> skipped;
+        //FolderNode* prev = treeStack.back();
+        QVector<FolderNode*> prev;
+        QVector<img::ResourceNode*> resPrev;
+        // img::ResourceNode* resPrev = resStack.back();
         FolderNode* current = treeStack.back();
-        img::ResourceNode* resPrev = resStack.back();
         img::ResourceNode* resCurrent = resStack.back();
         // for each layer
         for (const auto& lyr: *layers) {
-            skipped -= 1;
-            if (skipped == 0) {
-                current->setInitialRect(calculateBoundingRectFromChildren(*current));
-                current = prev;
-                resCurrent = resPrev;
-                skipped = -1;
+            if (!skipped.empty()) {
+                skipped.back() -= 1;
+                if (skipped.back() == 0) {
+                    current->setInitialRect(calculateBoundingRectFromChildren(*current));
+                    current = prev.back();
+                    resCurrent = resPrev.back();
+                    skipped.pop_back();
+                    prev.pop_back();
+                    resPrev.pop_back();
+                }
             }
             XC_PTR_ASSERT(current);
             XC_PTR_ASSERT(resCurrent);
@@ -530,6 +536,7 @@ bool ImageFileLoader::loadOra(Project& aProject, util::IProgressReporter& aRepor
                 layerNode->setDefaultImage(resNode->handle());
                 layerNode->setDefaultDepth(globalDepth - *parentDepth);
                 layerNode->setDefaultOpacity(lyr.opacity);
+                layerNode->setBlendMode(oraParser::oraBlendToPSDBlend(lyr.composite.blend));
                 // push back
                 current->children().pushBack(layerNode);
                 *progress+= 1;
@@ -539,8 +546,9 @@ bool ImageFileLoader::loadOra(Project& aProject, util::IProgressReporter& aRepor
             }
             // parse child folders
             if (lyr.type == FOLDER){
-                prev = current;
-                resPrev = resCurrent;
+                prev.append(current);
+                resPrev.append(resCurrent);
+                skipped.append(0);
                 // create node
                 auto resNode = createFolderResource(QString::fromStdString(lyr.name), lyr.rect.topLeft());
                 resCurrent->children().pushBack(resNode);
@@ -556,7 +564,7 @@ bool ImageFileLoader::loadOra(Project& aProject, util::IProgressReporter& aRepor
                 treeStack.back() = folderNode;
                 // update depth and ID
                 globalDepth -= 1.0f;
-                skipped = lyr.capacity + 1;
+                skipped.back() = lyr.capacity + 1;
                 // update vars
                 current = treeStack.back();
                 resCurrent = resStack.back();

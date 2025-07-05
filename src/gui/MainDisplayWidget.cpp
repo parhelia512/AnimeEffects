@@ -280,6 +280,7 @@ void MainDisplayWidget::paintGL() {
         mRenderInfo->destTexturizer = mDestinationTexturizer.data();
         XC_ASSERT(mRenderInfo->framebuffer != 0);
         XC_ASSERT(mRenderInfo->dest != 0);
+        mRenderInfo->camera.setFlip(mViewSetting.flipCanvas);
     }
 
     if (mDriver) {

@@ -90,7 +90,8 @@ std::array<QVector2D, 4> CameraInfo::toScreenQuadangle(const QRectF& aWorldRect)
         toScreenPos(QVector2D(aWorldRect.topLeft())),
         toScreenPos(QVector2D(aWorldRect.bottomLeft())),
         toScreenPos(QVector2D(aWorldRect.bottomRight())),
-        toScreenPos(QVector2D(aWorldRect.topRight()))};
+        toScreenPos(QVector2D(aWorldRect.topRight()))
+    };
 }
 
 std::array<QVector2D, 4> CameraInfo::toScreenQuadangle(const QRect& aWorldRect) const {
@@ -106,11 +107,13 @@ QMatrix4x4 CameraInfo::viewMatrix() const {
     static const float kFarPlane = 1000.0f;
 
     QMatrix4x4 scr;
+    QMatrix4x4 view;
+
     scr.translate(mCenter.x(), mCenter.y());
     scr.rotate(util::MathUtil::getDegreeFromRadian(mRotate), QVector3D(0.0f, 0.0f, 1.0f));
-    scr.scale(mScale, mScale);
+    if (flip) { scr.scale(-mScale, mScale); }
+    else { scr.scale(mScale, mScale); }
     scr.translate(-centerOffset().x(), -centerOffset().y());
-    QMatrix4x4 view;
     view.ortho(0.0f, mScreenSize.width(), mScreenSize.height(), 0.0f, kNearPlane, kFarPlane);
 
     return view * scr;
