@@ -406,68 +406,11 @@ GeneralSettingDialog::GeneralSettingDialog(GUIResources& aGUIResources, QWidget*
             QMessageBox ffmpegNotif;
 
             QString ffmpeg = getFFmpeg();
-
-            // Exists?
-            const bool fExists = util::NetworkUtil::libExists(ffmpeg, "-version") || util::NetworkUtil::libExists("ffmpeg");
-            qDebug("FFmpeg call test done");
-
-            if (!fExists) {
-                ffmpegNotif.setWindowTitle(tr("FFmpeg error"));
-                ffmpegNotif.setText(tr("FFmpeg is either missing, corrupted or otherwise doesn't work."));
-                ffmpegNotif.addButton(QMessageBox::Ok);
-                ffmpegNotif.exec();
+            bool ffmpegWorks = ffmpegCheck(ffmpeg, this);
+            if (!ffmpegWorks) {
+                ffmpegCheckFailed(this);
                 return;
             }
-            // Test file
-            QString testFile = QFileInfo("./data/themes/classic/icon/filew.png").absoluteFilePath();
-
-            // Sample gif test
-            QProcess gif;
-            #ifdef Q_OS_LINUX
-            gif.start(ffmpeg, {"-i", testFile, "~/.AECache/gif.gif"}, QProcess::ReadWrite);
-            gif.waitForFinished();
-            bool exportSuccess = gif.exitStatus() == 0 && QFileInfo::exists("~/.AECache/gif.gif");
-            #else
-            gif.start(ffmpeg, {"-i", testFile, "gif.gif"}, QProcess::ReadWrite);
-            gif.waitForFinished();
-            bool exportSuccess = gif.exitStatus() == 0 && QFileInfo::exists("gif.gif");
-            #endif
-
-            qDebug("Gif test done");
-            gif.deleteLater();
-
-            if (!exportSuccess) {
-                ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't export"));
-                ffmpegNotif.setText(tr("FFmpeg was unable to export, please check if it's a valid FFmpeg executable."));
-                ffmpegNotif.addButton(QMessageBox::Ok);
-                ffmpegNotif.exec();
-                return;
-            }
-
-            // Palettegen test
-            QProcess palettegen;
-            #ifdef Q_OS_LINUX
-            palettegen.start(ffmpeg, {"-i", testFile, "-vf", "palettegen", "~/.AECache/palette.png"}, QProcess::ReadWrite);
-            palettegen.waitForFinished();
-            bool pGenSuccess = palettegen.exitStatus() == 0 && QFileInfo::exists("~/.AECache/palette.png");
-            #else
-            palettegen.start(ffmpeg, {"-i", testFile, "-vf", "palettegen", "palette.png"}, QProcess::ReadWrite);
-            palettegen.waitForFinished();
-            bool pGenSuccess = palettegen.exitStatus() == 0 && QFileInfo::exists("palette.png");
-            #endif
-            if (!pGenSuccess) {
-                ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't generate palettes"));
-                ffmpegNotif.setText(
-                    tr("FFmpeg was unable to generate palettes, please check if it's a valid FFmpeg executable.")
-                );
-                ffmpegNotif.addButton(QMessageBox::Ok);
-                ffmpegNotif.exec();
-                return;
-            }
-            qDebug("Palettegen test done");
-            palettegen.deleteLater();
-
-
             ffmpegNotif.setWindowTitle(tr("FFmpeg test success"));
             ffmpegNotif.setText(tr("All tests have passed, FFmpeg is working correctly."));
             ffmpegNotif.setDetailedText(
@@ -622,6 +565,14 @@ GeneralSettingDialog::GeneralSettingDialog(GUIResources& aGUIResources, QWidget*
                 }
                 QFile(ffmpeg.absoluteFilePath()).rename(dir.absolutePath() + file);
                 qDebug() << "FFmpeg moved : " << QFile(dir.absolutePath() + file).exists();
+                #ifdef Q_OS_LINUX
+                QMessageBox info;
+                info.setWindowTitle(tr("FFmpeg installed"));
+                info.setText(tr("FFmpeg was installed but it requires to be set as executable, please right click "
+                                "\"ffmpeg\" go to properties and allow it to be executable as a program."));
+                info.exec();
+                QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
+                #endif
                 if (QFile(dir.absolutePath() + file).exists()) {
                     QMessageBox success;
                     success.setWindowTitle(tr("Success"));
@@ -752,6 +703,7 @@ QString GeneralSettingDialog::getFFmpeg() {
         qDebug() << "FFmpeg found in tools, initializing...";
         ffmpeg = ffmpeg_file.absoluteFilePath();
     }
+    qDebug() << "FFmpeg at: " << ffmpeg;
     return ffmpeg;
 }
 void GeneralSettingDialog::ffmpegCheckFailed(GeneralSettingDialog* aDialog) {
@@ -790,18 +742,21 @@ bool GeneralSettingDialog::ffmpegCheck(const QString& ffmpeg, GeneralSettingDial
     // PNG to GIF conversion test
     QString testFile = QFileInfo("./data/themes/classic/icon/filew.png").absoluteFilePath();
     QProcess gif;
-    gif.start(ffmpeg, {"-i", testFile, "gif.gif"}, QProcess::ReadWrite);
+    QString gifLoc = QFileInfo(ffmpeg).dir().absolutePath() + QString("/gif.gif");
+    qDebug() << gifLoc;
+    gif.start(ffmpeg, {"-i", testFile,gifLoc}, QProcess::ReadWrite);
     gif.waitForFinished();
-    bool exportSuccess = gif.exitStatus() == 0 && QFileInfo::exists("gif.gif");
-    qDebug() << "Gif exists: " << QFileInfo::exists("gif.gif") << "| Gif remove: " << QFile("gif.gif").remove();
+    qDebug() << gif.readAll();
+    bool exportSuccess = gif.exitStatus() == 0 && QFileInfo::exists(gifLoc);
+    qDebug() << "Gif exists: " << QFileInfo::exists(gifLoc) << "| Gif remove: " << QFile(gifLoc).remove();
     gif.deleteLater();
     if (!exportSuccess) {
         ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't export"));
         ffmpegNotif.setText(tr("FFmpeg was unable to export, please troubleshoot."));
         ffmpegNotif.setDetailedText(
             "File exists: " + QString(QFileInfo::exists("./data/themes/classic/icon/filew.png")? "True" : "False") +
-            "File readable: " + QString(QFileInfo("./data/themes/classic/icon/filew.png").isReadable()? "True" : "False") +
-            "File writeable: " + QString(QFileInfo("./data/themes/classic/icon/filew.png").isWritable()? "True" : "False") +
+            "\nFile readable: " + QString(QFileInfo("./data/themes/classic/icon/filew.png").isReadable()? "True" : "False") +
+            "\nFile writeable: " + QString(QFileInfo("./data/themes/classic/icon/filew.png").isWritable()? "True" : "False") +
             "\nFolder writeable: " + QString(QDir("./data/themes/classic/icon/").exists() ? "True" : "False") +
             "\nFolder readable: " + QString(QDir("./data/themes/classic/icon/").isReadable() ? "True" : "False")
             );
