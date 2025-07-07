@@ -468,7 +468,7 @@ bool ImageFileLoader::loadOra(Project& aProject, util::IProgressReporter& aRepor
         aReporter.setProgress(100);
         reader.printSelf();
         // helpers
-        const auto* image = &reader.oraImage.image;
+        const auto* image = &reader.oraImage.oraImage;
         auto* layers = &reader.oraImage.layers;
         // update reporter
         aReporter.setSection(QCoreApplication::translate("Image Loader", "Building object trees..."));

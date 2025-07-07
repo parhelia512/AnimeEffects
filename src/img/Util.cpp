@@ -323,7 +323,7 @@ ResourceNode* Util::createResourceNodes(bool merged, const std::string& aFilePat
     }
     reader.printSelf();
     // helpers
-    auto image = reader.oraImage.image;
+    auto image = reader.oraImage.oraImage;
     auto layers = reader.oraImage.layers;
     QImage img = QImage::fromData(QByteArray::fromStdString(ora.read("mergedimage.png")));
     if (img.isNull()) {

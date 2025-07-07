@@ -76,7 +76,7 @@ struct layerStack {
 };
 
 struct openRaster {
-    image image{};
+    image oraImage{};
     QVector<layerStack> layers;
 };
 
@@ -188,10 +188,10 @@ public:
 
     void printSelf() const{
         qDebug("<|IMAGE|>");
-        qDebug() << "image height: " << oraImage.image.height;
-        qDebug() << "image width: " << oraImage.image.width;
-        qDebug() << "image rect: " << oraImage.image.rect;
-        qDebug() << "openRaster spec version: " << oraImage.image.oraVersion.c_str();
+        qDebug() << "image height: " << oraImage.oraImage.height;
+        qDebug() << "image width: " << oraImage.oraImage.width;
+        qDebug() << "image rect: " << oraImage.oraImage.rect;
+        qDebug() << "openRaster spec version: " << oraImage.oraImage.oraVersion.c_str();
         printLayers(oraImage.layers);
         qDebug("<|IMAGE|>");
     }

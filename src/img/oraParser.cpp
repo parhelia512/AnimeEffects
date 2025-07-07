@@ -27,7 +27,7 @@ void oraParser::parse(layerStack* layer_stack, pugi::xml_node::iterator::pointer
 
     if(charIsEqualTo(xml_node->name(), "layer")){
         layer_stack->type = IMAGE;
-        oraImage.image.layerNumber += 1;
+        oraImage.oraImage.layerNumber += 1;
     }
     else if(charIsEqualTo(xml_node->name(), "stack")){
         layer_stack->type = FOLDER;
@@ -108,11 +108,11 @@ bool oraParser::initialize() {
     if(result.status == pugi::xml_parse_status::status_ok){
         // Parse image
         const pugi::xml_node& Image = reader->child("image");
-        oraImage.image.width = Image.attribute("w").as_int();
-        oraImage.image.height = Image.attribute("h").as_int();
-        oraImage.image.oraVersion = Image.attribute("version").as_string();
-        oraImage.image.rect = QRect(0, 0, oraImage.image.width, oraImage.image.height);
-        if(oraImage.image.oraVersion.empty()){ oraImage.image.oraVersion = "0.0.1"; }
+        oraImage.oraImage.width = Image.attribute("w").as_int();
+        oraImage.oraImage.height = Image.attribute("h").as_int();
+        oraImage.oraImage.oraVersion = Image.attribute("version").as_string();
+        oraImage.oraImage.rect = QRect(0, 0, oraImage.oraImage.width, oraImage.oraImage.height);
+        if(oraImage.oraImage.oraVersion.empty()){ oraImage.oraImage.oraVersion = "0.0.1"; }
         // Parse stacks
         pugi::xml_node mainStack = reader->child("image").child("stack");
         layerStack layer;
