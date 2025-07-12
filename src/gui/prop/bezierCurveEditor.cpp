@@ -89,7 +89,6 @@ void BezierCurveEditor::paintEvent(QPaintEvent *)
     m_points[StartPoint]    = QPointF(20, height() - 20);
     m_points[EndPoint]      = QPointF(width() - 20, 20);
     // We clamp to not go outside the widget
-
     m_points[ControlPoint1].setX(std::clamp(m_points[ControlPoint1].x(), qreal(20), qreal(width() - 20)));
     m_points[ControlPoint1].setY(std::clamp(m_points[ControlPoint1].y(), qreal(20), qreal(height() - 20)));
     m_points[ControlPoint2].setX(std::clamp(m_points[ControlPoint2].x(), qreal(20), qreal(width() - 20)));

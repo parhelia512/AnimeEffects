@@ -1476,7 +1476,7 @@ void MainWindow::onQuickExportTriggered(const QString& aFormat) {
     genParam.allowTransparency = aFormat.contains("_t") || aFormat == "png";
     genParam.forcePipe = false;
     genParam.loop = true;
-    genParam.exportWithAudio = true;
+    genParam.exportWithAudio = !mCurrent->pConf->empty();
     genParam.useCustomParam = false;
     frameExportRange fer;
     fer.lastFrame = mCurrent->attribute().maxFrame();

@@ -1,6 +1,6 @@
 QSplitter#propertysplitter {
-    width: 30ex;
-	min-width: 20em;
+    width: 18em;
+    padding-right: 0.4em;
 }
 
 QFrame#holder {

@@ -183,8 +183,8 @@ namespace prop {
         mCustomEasing = new QPushButton;
         mLayout->addWidget(mCustomEasing, 1, 1, 1, 3);
         mCustomEasing->setIcon(mGUIResources->icon("ease"));
-        mCustomEasing->setText(QCoreApplication::tr("Custom easing"));
-        mCustomEasing->setToolTip(QCoreApplication::tr("Custom easing"));
+        mCustomEasing->setText(QCoreApplication::tr("Custom"));
+        mCustomEasing->setToolTip(QCoreApplication::tr("Bezier editor"));
         mCustomEasing->connect(mCustomEasing, &QToolButton::clicked, [=]() {
             mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
             auto* splineWidgetClass = new Ui_splineWidget();

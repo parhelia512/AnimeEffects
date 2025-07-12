@@ -593,7 +593,7 @@ void ObjectTreeWidget::onAddTreeTriggered(bool) {
             formLayout = new QFormLayout(treeScrollWidget);
             formLayout->setObjectName("formLayout");
 
-            for (auto treeName : treeNames) {
+            for (const auto& treeName : treeNames) {
                 treeCheckBoxes.append(new QCheckBox(treeScrollWidget));
                 QSizePolicy sizePolicy(QSizePolicy::Policy::MinimumExpanding, QSizePolicy::Policy::MinimumExpanding);
                 sizePolicy.setHeightForWidth(treeCheckBoxes.last()->sizePolicy().hasHeightForWidth());

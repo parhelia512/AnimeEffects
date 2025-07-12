@@ -16,19 +16,19 @@
 #include <qgraphicsview.h>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
-#include <QtWidgets/QPushButton>
 #include <QtWidgets/QToolButton>
-#include <QtWidgets/QDialog>
 #include "gui/prop/bezierCurveEditor.h"
 #include "tool/tool_FFDPanel.h"
 #include "util/Easing.h"
+#include "util/Easing.h"
+#include <QtConcurrent>
 
 #include <QMessageBox>
+#include <QProgressBar>
 
 QT_BEGIN_NAMESPACE
 
-class Ui_splineWidget
-{
+class Ui_splineWidget {
 public:
     QGridLayout *gridLayout_2;
     QDoubleSpinBox *x1_spin;
@@ -42,6 +42,8 @@ public:
     QDoubleSpinBox *y2_spin;
     QPushButton *cancel;
     QPushButton *apply;
+    QProgressBar *progressBar;
+    int progress;
     QVector<QDoubleSpinBox*> spins;
 
 
@@ -57,12 +59,13 @@ public:
         return static_cast<float>(max) - value + static_cast<float>(min);
     }
 
-    void setupUi(QDialog *splineWidget, const gui::GUIResources* guiRes, util::Easing::CubicBezier* cubicBezier)
-    {
+    void setupUi(QDialog *splineWidget, const gui::GUIResources* guiRes, util::Easing::CubicBezier* cubicBezier) {
         bezier = cubicBezier;
         if (splineWidget->objectName().isEmpty())
             splineWidget->setObjectName("splineWidget");
         splineWidget->resize(400, 400);
+        splineWidget->setMinimumHeight(200);
+        splineWidget->setMinimumWidth(200);
         gridLayout_2 = new QGridLayout(splineWidget);
         gridLayout_2->setObjectName("gridLayout_2");
         x1_spin = new QDoubleSpinBox(splineWidget);
@@ -97,8 +100,11 @@ public:
         m_editor = new BezierCurveEditor(splineWidget, guiRes->mTheme.isDark(), cubicBezier, spins);
         for (auto spin : spins) {
             spin->setSingleStep(0.01);
+            spin->setMaximum(2);
+            spin->setMinimum(-2);
             QDoubleSpinBox::connect(spin, &QDoubleSpinBox::valueChanged, [=](double) {
                 m_editor->blockSignals(true);
+                progress = 0;
                 *cubicBezier = {
                     static_cast<float>(spins[0]->value()),
                     static_cast<float>(spins[1]->value()),
@@ -169,6 +175,46 @@ public:
 
         gridLayout_2->addWidget(toolButton, 3, 0, 1, 1);
 
+        // Fuck it, we ball. These numbers are picked for increased smoothness and also to make this easier to code lol
+        float accuracy = 10000000.0f;
+        float progressAccuracy = 1000.0f;
+        progressBar = new QProgressBar(splineWidget);
+        progressBar->setValue(0);
+        progressBar->setMinimum(0.0);
+        progressBar->setMaximum(accuracy);
+        progressBar->setTextVisible(false);
+        progressBar->setObjectName("progressBar");
+
+        gridLayout_2->addWidget(progressBar, 6, 0, 1, 6);
+
+        QTimer *timer = new QTimer(splineWidget);
+        timer->connect(timer, &QTimer::timeout, [=] {
+            progress++;
+            // The addition is for extra time so the animation is smoother
+            if (progress >= progressAccuracy + 125) {
+                progress = 0;
+            }
+            /*qDebug("---");
+            qDebug() << progress;*/
+            QEasingCurve easing;
+            easing.setType(QEasingCurve::BezierSpline);
+            easing.addCubicBezierSegment({
+                cubicBezier->x1, cubicBezier->x2},
+                {cubicBezier->y1, cubicBezier->y2},
+                {1.0, 1.0}
+                );
+            float easingProgress = easing.valueForProgress(progress / progressAccuracy);
+            /*qDebug() << easingProgress;
+            qDebug("---");*/
+            progressBar->setValue(easingProgress * accuracy);
+        });
+        timer->start(4);
+
+        timer->connect(splineWidget, &QDialog::finished, [=]() {
+            timer->stop();
+            timer->deleteLater();
+        });
+
         cancel = new QPushButton(splineWidget);
         cancel->setObjectName("cancel");
 
@@ -176,7 +222,7 @@ public:
             splineWidget->reject();
         });
 
-        gridLayout_2->addWidget(cancel, 6, 0, 1, 3);
+        gridLayout_2->addWidget(cancel, 7, 0, 1, 3);
 
         apply = new QPushButton(splineWidget);
         apply->setObjectName("apply");
@@ -185,7 +231,7 @@ public:
             splineWidget->accept();
         });
 
-        gridLayout_2->addWidget(apply, 6, 3, 1, 3);
+        gridLayout_2->addWidget(apply, 7, 3, 1, 3);
 
 
         retranslateUi(splineWidget);

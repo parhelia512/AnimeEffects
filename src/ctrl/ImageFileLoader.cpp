@@ -153,6 +153,7 @@ bool ImageFileLoader::loadImage(core::Project& aProject, util::IProgressReporter
 
         // create layer resource (Note that the rect be modified.)
         auto resNode = img::Util::createResourceNode(image, name, true);
+        resNode->data().setPos(image.rect().topLeft());
         resTree->children().pushBack(resNode);
 
         // create layer node

@@ -4,7 +4,7 @@ QPushButton#toolButton {
     border: 0.1em solid #76797c;
     border-radius: 0.6em;
     padding: -0.1em;
-    width: 2.6em;
+    width: 0.6em;
     height: 2.6em;
     icon-size: 2.6em;
 }
