@@ -2,7 +2,7 @@
 
 ## Download
 
-|                                                                                                                                                               Stable (v1.6)                                                                                                                                                               |                                                                                                                                                                                     Nightly                                                                                                                                                                                      |                                          Source code                                           |
+|                                                                                                                                                               Stable (v1.6.1)                                                                                                                                                               |                                                                                                                                                                                     Nightly                                                                                                                                                                                      |                                          Source code                                           |
 | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------: |
 | [Windows](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.6/AnimeEffects-Installer-Windows.exe) - [MacOS](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.6/AnimeEffects-MacOS.zip) - [Linux](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.6/AnimeEffects-Linux.zip) | [Windows](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build-windows.yaml/master/AnimeEffects-Windows-x64.zip) - [MacOS](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_mac_intel.yaml/master/AnimeEffects-MacOS.zip) - [Linux](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_linux.yaml/master/AnimeEffects-Linux.zip) | [Download ZIP](https://github.com/AnimeEffectsDevs/AnimeEffects/archive/refs/heads/master.zip) |
 
@@ -57,7 +57,7 @@ AnimeEffects will notify you of available stable releases as soon as they come o
 
 - Windows 10 (this version approaches EOL, we suggest you upgrade or change OS soon) or newer
 - Ubuntu LTS or comparable distro
-- MacOS Monterey or newer
+- MacOS Ventura or newer
 
 ## Development requirements
 

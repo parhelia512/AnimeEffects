@@ -23,6 +23,9 @@ LocaleDecider::LocaleDecider(): mLocaleParam(), mTranslator(), mHasTranslator() 
         else if (language == "Spanish") {
             locAbb = "es";
         }
+        else if (language == "Russian") {
+            locAbb = "ru";
+        }
         else {
             auto language = QLocale::system().language();
             if (language == QLocale::Japanese) {
@@ -33,6 +36,9 @@ LocaleDecider::LocaleDecider(): mLocaleParam(), mTranslator(), mHasTranslator() 
             }
             if (language == QLocale::Spanish) {
                 locAbb = "es";
+            }
+            if (language == QLocale::Russian) {
+                locAbb = "ru";
             }
         }
     }

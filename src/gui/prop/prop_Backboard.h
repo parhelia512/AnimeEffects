@@ -15,7 +15,7 @@ namespace prop {
 
     class Backboard: public QWidget {
     public:
-        Backboard(ViaPoint& aViaPoint, QWidget* aParent);
+        Backboard(ViaPoint& aViaPoint, QWidget* aParent, GUIResources* aGUIResources);
         void setProject(core::Project* aProject);
         void setTarget(core::ObjectNode* aNode);
         void setPlayBackActivity(bool aIsActive);
@@ -28,6 +28,7 @@ namespace prop {
         void resetLayout();
 
         ViaPoint& mViaPoint;
+        GUIResources* mGUIResources{};
         core::Project* mProject;
         QVBoxLayout* mLayout;
         QScopedPointer<ConstantPanel> mConstantPanel;

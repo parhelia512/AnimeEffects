@@ -1,6 +1,9 @@
 #ifndef GUI_PROP_ITEMS_H
 #define GUI_PROP_ITEMS_H
 
+#include "gui/GUIResources.h"
+
+
 #include <functional>
 #include <array>
 #include <QPushButton>
@@ -133,7 +136,7 @@ namespace prop {
     public:
         typedef std::function<void(util::Easing::Param, util::Easing::Param)> UpdateType;
 
-        EasingItem(QWidget* aParent);
+        EasingItem(QWidget* aParent, const GUIResources* mGUIResources);
 
         QComboBox& comboBox(int aIndex) { return *mBox.at(aIndex); }
         const QComboBox& comboBox(int aIndex) const { return *mBox.at(aIndex); }
@@ -150,10 +153,12 @@ namespace prop {
     private:
         void onEditingFinished();
 
-        QLayout* mLayout;
+        QGridLayout* mLayout;
         std::array<QComboBox*, 2> mBox;
+        util::Easing::CubicBezier mCubicBezier;
         DoubleSpinBox* mDBox;
         util::Easing::Param mStamp;
+        QPushButton* mCustomEasing;
         bool mSignal;
     };
 

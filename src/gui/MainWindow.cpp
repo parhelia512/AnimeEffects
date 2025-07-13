@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QDockWidget>
 #include "GeneralSettingDialog.h"
 #include "util/IProgressReporter.h"
 #include "gl/Global.h"
@@ -12,6 +11,7 @@
 #include "util/NetworkUtil.h"
 #include <set>
 #include <utility>
+#include <QComboBox>
 // This thing is held by duct tape and OOP hell I swear...
 #include "ctrl/ExportParams.h"
 
@@ -153,14 +153,14 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, LocalePa
         mDockPropertyWidget = dockWidget;
 
 #if 0
-        mProperty = new PropertyWidget(dockWidget);
+        mProperty = new PropertyWidget(mViaPoint, splitter, &mGUIResources);
         dockWidget->setWidget(mProperty);
 #else
         auto splitter = new QSplitter(Qt::Vertical, dockWidget);
         splitter->setObjectName("propertysplitter");
         dockWidget->setWidget(splitter);
 
-        mProperty = new PropertyWidget(mViaPoint, splitter);
+        mProperty = new PropertyWidget(mViaPoint, splitter, &mGUIResources);
         splitter->addWidget(mProperty);
 
         auto textEdit = new QPlainTextEdit(splitter);
@@ -844,7 +844,6 @@ void MainWindow::onOpenRecentTriggered(QString aFileName) {
     if (result) {
         resetProjectRefs(result.project);
         mProjectTabBar->pushProject(*result.project);
-
         mMainDisplay->resetCamera();
     } else {
         QMessageBox::warning(nullptr, tr("Loading Error"), result.messages());
@@ -979,119 +978,14 @@ void MainWindow::onExportTriggered() {
     // Stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
     QGuiApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-    // FFmpeg Check
     QSettings settings;
-    auto ffCheck = settings.value("ffmpeg_check");
-    QFileInfo ffmpeg_file;
-    QString ffmpeg;
-
-    if (util::NetworkUtil::os() == "win") { ffmpeg_file = QFileInfo("./tools/ffmpeg.exe"); }
-    else { ffmpeg_file = QFileInfo("./tools/ffmpeg"); }
-    auto file = util::NetworkUtil::os() == "win" ? "ffmpeg.exe" : "ffmpeg";
-    auto appdata = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
-    auto anieFolder = QDir(appdata.absolutePath() + "/AnimeEffects");
-    if (!ffmpeg_file.exists() || !ffmpeg_file.isExecutable()) {
-        qDebug() << "FFmpeg not found, attempting backup...";
-        ffmpeg_file = QFileInfo(anieFolder.absolutePath() + "/" + file);
-        ffmpeg = ffmpeg_file.absoluteFilePath();
-        if (!anieFolder.exists() || !QFileInfo(anieFolder.absolutePath()).isReadable()) {
-            qDebug() << "AnimeEffects not found in appdata, attempting backup...";
-            appdata = QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-            anieFolder = QDir(appdata.absolutePath() + "/AnimeEffects");
-            ffmpeg_file = QFileInfo(anieFolder.absolutePath() + "/" + file);
-            ffmpeg = ffmpeg_file.absoluteFilePath();
-            if (!anieFolder.exists() || !QFileInfo(anieFolder.absolutePath()).isReadable()) {
-                qDebug() << "AnimeEffects not found in documents, attempting back up...";
-                appdata = QApplication::applicationDirPath();
-                ffmpeg_file = QFileInfo(appdata.absolutePath() + "/" + file);
-                ffmpeg = ffmpeg_file.absoluteFilePath();
-                if (!appdata.exists() || !ffmpeg_file.isReadable()) {
-                    qDebug() << "AnimeEffects not found in appdir, stopping...";
-                    ffmpeg = "ffmpeg";
-                }
-                else { qDebug("FFmpeg found in appdir, initializing..."); }
-            }
-            else{ qDebug("FFmpeg found in documents, initializing..."); }
-        } else { qDebug("FFmpeg found in appdata, initializing..."); }
-
-    }
-    else {
-        qDebug() << "FFmpeg found in tools, initializing...";
-        ffmpeg = ffmpeg_file.absoluteFilePath();
-    }
-
-    if (bool fExists = util::NetworkUtil::libExists(ffmpeg, "-version");
-        !fExists || !ffCheck.isValid() || ffCheck.toBool()) {
-        if (!fExists) {
-            QMessageBox message;
-            message.setIcon(QMessageBox::Warning);
-            message.setText(tr("FFmpeg was not found."));
-            auto infoText =
-                tr("Exporting video requires FFmpeg to be installed on your computer, "
-                   "FFmpeg is a free tool that AnimeEffects uses to create video files.\n"
-                   "In the following screen you can instruct AnimeEffects to download and install it automatically for "
-                   "you, "
-                   "or you can download it by yourself and tell AnimeEffects where it is.");
-            message.setInformativeText(infoText);
-            message.setStandardButtons(QMessageBox::Ok);
-            message.setDefaultButton(QMessageBox::Ok);
-            message.exec();
-
-            auto* generalSettingsDialog = new GeneralSettingDialog(mGUIResources, this);
-            generalSettingsDialog->selectTab(2);
-            generalSettingsDialog->exec();
-            ffCheck.setValue(true);
-            return;
-        }
-        // Test FFmpeg functionality before attempting export
-        QMessageBox ffmpegNotif;
-        ffmpegNotif.setIcon(QMessageBox::Critical);
-        // PNG to GIF conversion test
-        QString testFile = QFileInfo("./data/themes/classic/icon/filew.png").absoluteFilePath();
-        QProcess gif;
-        gif.start(ffmpeg, {"-i", testFile, "gif.gif"}, QProcess::ReadWrite);
-        gif.waitForFinished();
-        bool exportSuccess = gif.exitStatus() == 0 && QFileInfo::exists("gif.gif");
-        qDebug() << "Gif exists: " << QFileInfo::exists("gif.gif") << "| Gif remove: " << QFile("gif.gif").remove();
-        gif.deleteLater();
-        if (!exportSuccess) {
-            ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't export"));
-            ffmpegNotif.setText(tr("FFmpeg was unable to export, please troubleshoot."));
-            ffmpegNotif.setDetailedText(
-                "File exists: " + QString(QFileInfo::exists("./data/themes/classic/icon/filew.png")? "True" : "False") +
-                "File readable: " + QString(QFileInfo("./data/themes/classic/icon/filew.png").isReadable()? "True" : "False") +
-                "File writeable: " + QString(QFileInfo("./data/themes/classic/icon/filew.png").isWritable()? "True" : "False") +
-                "\nFolder writeable: " + QString(QDir("./data/themes/classic/icon/").exists() ? "True" : "False") +
-                "\nFolder readable: " + QString(QDir("./data/themes/classic/icon/").isReadable() ? "True" : "False")
-                );
-            ffmpegNotif.addButton(QMessageBox::Ok);
-            ffmpegNotif.exec();
-            auto* generalSettingsDialog = new GeneralSettingDialog(mGUIResources, this);
-            generalSettingsDialog->selectTab(2);
-            generalSettingsDialog->exec();
-            ffCheck.setValue(true);
-            return;
-        }
-        // Palettegen test
-        QProcess palettegen;
-        palettegen.start(ffmpeg, {"-i", testFile, "-vf", "palettegen", "palette.png"}, QProcess::ReadWrite);
-        palettegen.waitForFinished();
-        bool pGenSuccess = palettegen.exitStatus() == 0 && QFileInfo::exists("palette.png");
-        if (!pGenSuccess) {
-            ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't generate palettes"));
-            ffmpegNotif.setText(tr("FFmpeg was unable to generate palettes, please troubleshoot."));
-            ffmpegNotif.addButton(QMessageBox::Ok);
-            ffmpegNotif.exec();
-            auto* generalSettingsDialog = new GeneralSettingDialog(mGUIResources, this);
-            generalSettingsDialog->selectTab(2);
-            generalSettingsDialog->exec();
-            ffCheck.setValue(true);
-            return;
-        }
-        qDebug() << "Palette exists: " << QFileInfo::exists("palette.png")
-                 << "| Palette remove: " << QFile("palette.png").remove();
-        palettegen.deleteLater();
-        ffCheck.setValue(false);
+    // FFmpeg Check
+    QString ffmpeg = GeneralSettingDialog::getFFmpeg();
+    auto* aDiag = new GeneralSettingDialog(mGUIResources, this);
+    bool ffmpegWorks = GeneralSettingDialog::ffmpegCheck(ffmpeg, aDiag);
+    if (!ffmpegWorks) {
+        GeneralSettingDialog::ffmpegCheckFailed(aDiag);
+        return;
     }
     // Initialize export diag
     exporting = true;
@@ -1557,97 +1451,98 @@ void MainWindow::onExportImageSeqTriggered(const QString& aSuffix) {
         }
     }
 }
+
+void MainWindow::onQuickExportTriggered(const QString& aFormat) {
+    // General parameters
+    GeneralParams genParam;
+    genParam.fileName = mCurrent->fileName();
+    if (genParam.fileName.isEmpty()) {
+        genParam.fileName = "New Export";
+    }
+    genParam.exportName = QFileInfo(genParam.fileName).baseName();
+    genParam.exportDirectory = QFileDialog::getExistingDirectory(this, tr("Export Folder"));
+    genParam.exportFileName = QDir(genParam.exportDirectory.absolutePath() + "/" + genParam.exportName + "." +
+        QString(aFormat).replace("_o", "").replace("_t", "").replace(".anie", ""));
+    genParam.osExportTarget = QFileInfo(genParam.exportName).absoluteFilePath();
+    genParam.nativeWidth = mCurrent->attribute().imageSize().width();
+    genParam.nativeHeight = mCurrent->attribute().imageSize().height();
+    genParam.exportWidth = mCurrent->attribute().imageSize().width();
+    genParam.exportHeight = mCurrent->attribute().imageSize().height();
+    genParam.aspectRatio = custom;
+    genParam.nativeFPS = mCurrent->attribute().fps();
+    genParam.fps = mCurrent->attribute().fps();
+    genParam.bitrate = 0;
+    genParam.imageExportQuality = 100;
+    genParam.allowTransparency = aFormat.contains("_t") || aFormat == "png";
+    genParam.forcePipe = false;
+    genParam.loop = true;
+    genParam.exportWithAudio = !mCurrent->pConf->empty();
+    genParam.useCustomParam = false;
+    frameExportRange fer;
+    fer.lastFrame = mCurrent->attribute().maxFrame();
+    genParam.nativeFrameRange = fer;
+    genParam.exportAllFrames = true;
+    genParam.exportRange = {fer};
+    genParam.exportToLast = true;
+    genParam.imageExportQuality = -1;
+    // Get format info
+    bool imageExport = false;
+    ImageParams img;
+    VideoParams vid;
+    if (aFormat == "png") {
+        imageExport = true;
+        img.format = availableImageFormats::png;
+    }
+    else {
+        if (aFormat.contains("gif")) {
+            vid.format = availableVideoFormats::gif;
+        }
+        else if (aFormat.contains("mp4")) {
+            vid.format = availableVideoFormats::mp4;
+        }
+        else if (aFormat.contains("avi")) {
+            vid.format = availableVideoFormats::avi;
+        }
+        else if (aFormat.contains("webm")) {
+            vid.format = availableVideoFormats::webm;
+        }
+        if (!genParam.allowTransparency)
+            vid.intermediateFormat = availableIntermediateFormats::ppm;
+        else {
+            vid.intermediateFormat = availableIntermediateFormats::png;
+        }
+    }
+    // Export parameters
+    auto exParam = new exportParam();
+    exParam->generalParams = genParam;
+    exParam->imageParams = img;
+    exParam->videoParams = vid;
+    exParam->exportType = imageExport? exportTarget::image : exportTarget::video;
+
+    // Main export function
+    std::vector<audioConfig> validAudioStreams = AudioPlaybackWidget::getValidAudioStreams(*mCurrent->pConf);
+    if(isExportParamValid(exParam, exportWidget, &validAudioStreams)){
+        exportProject(*exParam, mCurrent, exportWidget, validAudioStreams);
+    }
+}
+
 void MainWindow::onExportVideoTriggered(const ctrl::VideoFormat& aFormat) {
     if (!mCurrent)
         return;
-    QSettings settings;
-    auto ffCheck = settings.value("ffmpeg_test_check");
-    QFileInfo ffmpeg_file;
-    QString ffmpeg;
-    if (util::NetworkUtil::os() == "win") { ffmpeg_file = QFileInfo("./tools/ffmpeg.exe"); }
-    else { ffmpeg_file = QFileInfo("./tools/ffmpeg"); }
-    if (!ffmpeg_file.exists() || !ffmpeg_file.isExecutable()) { ffmpeg = "ffmpeg"; }
-    else { ffmpeg = ffmpeg_file.absoluteFilePath(); }
-    bool fExists = util::NetworkUtil::libExists(ffmpeg, "-version");
-    #ifdef Q_OS_LINUX
-    fExists = true;
-    #endif
-    if (!fExists || (!ffCheck.isValid() || ffCheck.toBool())) {
-        if (!fExists) {
-            QMessageBox message;
-            message.setIcon(QMessageBox::Warning);
-            message.setText(tr("FFmpeg was not found."));
-            auto infoText =
-                tr("Exporting video requires FFmpeg to be installed on your computer, "
-                   "FFmpeg is a free tool that AnimeEffects uses to create video files.\n"
-                   "In the following screen you can instruct AnimeEffects to download and install it automatically for "
-                   "you, "
-                   "or you can download it by yourself and tell AnimeEffects where it is.");
-            message.setInformativeText(infoText);
-            message.setStandardButtons(QMessageBox::Ok);
-            message.setDefaultButton(QMessageBox::Ok);
-            message.exec();
-
-            auto* generalSettingsDialog = new GeneralSettingDialog(mGUIResources, this);
-            generalSettingsDialog->selectTab(2);
-            generalSettingsDialog->exec();
-            ffCheck.setValue(true);
-            return;
-        }
-        // Test FFmpeg functionality before attempting export
-        else{
-            QMessageBox ffmpegNotif;
-            ffmpegNotif.setIcon(QMessageBox::Critical);
-            // PNG to GIF conversion test
-            QString testFile = QFileInfo("./data/themes/classic/icon/filew.png").absoluteFilePath();
-            QProcess gif;
-            gif.start(ffmpeg, {"-i", testFile, "gif.gif"}, QProcess::ReadWrite);
-            gif.waitForFinished();
-            bool exportSuccess = gif.exitStatus() == 0 && QFileInfo::exists("gif.gif");
-            qDebug() << "Gif exists: " << QFileInfo::exists("gif.gif")
-                     << "| Gif remove: " << QFile("gif.gif").remove();
-            gif.deleteLater();
-            if (!exportSuccess) {
-                ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't export"));
-                ffmpegNotif.setText(tr("FFmpeg was unable to export, please troubleshoot."));
-                ffmpegNotif.addButton(QMessageBox::Ok);
-                ffmpegNotif.exec();
-                auto* generalSettingsDialog = new GeneralSettingDialog(mGUIResources, this);
-                generalSettingsDialog->selectTab(2);
-                generalSettingsDialog->exec();
-                ffCheck.setValue(true);
-                return;
-            }
-            // Palettegen test
-            QProcess palettegen;
-            palettegen.start(ffmpeg, {"-i", testFile, "-vf", "palettegen", "palette.png"}, QProcess::ReadWrite);
-            palettegen.waitForFinished();
-            bool pGenSuccess = palettegen.exitStatus() == 0 && QFileInfo::exists("palette.png");
-            if (!pGenSuccess) {
-                ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't generate palettes"));
-                ffmpegNotif.setText(
-                    tr("FFmpeg was unable to generate palettes, please troubleshoot.")
-                );
-                ffmpegNotif.addButton(QMessageBox::Ok);
-                ffmpegNotif.exec();
-                auto* generalSettingsDialog = new GeneralSettingDialog(mGUIResources, this);
-                generalSettingsDialog->selectTab(2);
-                generalSettingsDialog->exec();
-                ffCheck.setValue(true);
-                return;
-            }
-            qDebug() << "Palette exists: " << QFileInfo::exists("palette.png")
-                     << "| Palette remove: " << QFile("palette.png").remove();
-            palettegen.deleteLater();
-        }
-        ffCheck.setValue(false);
+    // FFmpeg Check
+    QString ffmpeg = GeneralSettingDialog::getFFmpeg();
+    auto* aDiag = new GeneralSettingDialog(mGUIResources, this);
+    bool ffmpegWorks = GeneralSettingDialog::ffmpegCheck(ffmpeg, aDiag);
+    if (!ffmpegWorks) {
+        GeneralSettingDialog::ffmpegCheckFailed(aDiag);
+        return;
     }
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
     const QString suffix = aFormat.name;
     const QString targetVideos = "Videos (*." + suffix + ")";
-    const bool isGif = (suffix == "gif");
+    const bool isGif = suffix == "gif";
 
     // get export file name
     QString fileName = QFileDialog::getSaveFileName(

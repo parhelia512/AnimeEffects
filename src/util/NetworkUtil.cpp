@@ -60,6 +60,21 @@ auto NetworkUtil::libExists(const QString& aLib, QString versionType) -> bool {
     // Very much a lazy hack, regex checks for numbers with dots at either side
     return QString(process.readAll().data()).contains(QRegularExpression(R"(((\d+\.)|(\.+\d)))"));
 }
+bool NetworkUtil::libExists(const char* libName) {
+    QProcess process;
+    #ifdef Q_OS_WIN
+        process.start("where", {libName}, QProcess::ReadWrite);
+    #elif defined(Q_OS_MAC)
+        process.start("which", {libName}, QProcess::ReadWrite);
+    #else
+        process.start("which", {libName}, QProcess::ReadWrite);
+    #endif
+    process.waitForFinished();
+    if (process.exitStatus() != 0 || QString(process.readAllStandardOutput().data()).isEmpty()) {
+        return false;
+    }
+    return true;
+}
 
 // The "json" type accepts only lists of size 1.
 // The "download" type requires index 0 to be the url and index 1 to be the path.

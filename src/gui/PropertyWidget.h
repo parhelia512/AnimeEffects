@@ -14,7 +14,7 @@ namespace gui {
 
 class PropertyWidget: public QScrollArea {
 public:
-    PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent);
+    PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent, GUIResources* mGUIResources);
     ~PropertyWidget();
 
     void setProject(core::Project* aProject);
@@ -35,6 +35,7 @@ private:
     void updateAllProperties();
 
     util::LinkPointer<core::Project> mProject;
+    GUIResources* mGUIResources;
     util::SlotId mTimeLineSlot;
     util::SlotId mNodeAttrSlot;
     util::SlotId mResModifiedSlot;

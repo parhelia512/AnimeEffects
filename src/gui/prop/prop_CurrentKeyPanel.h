@@ -1,6 +1,7 @@
 #ifndef GUI_PROP_CURRENTKEYPANEL_H
 #define GUI_PROP_CURRENTKEYPANEL_H
 
+#include "gui/GUIResources.h"
 #include "core/Project.h"
 #include "core/ObjectNode.h"
 #include "gui/ViaPoint.h"
@@ -17,7 +18,7 @@ namespace prop {
     class MoveKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -37,7 +38,7 @@ namespace prop {
     class RotateKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -55,7 +56,7 @@ namespace prop {
     class ScaleKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        ScaleKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        ScaleKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -73,7 +74,7 @@ namespace prop {
     class DepthKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        DepthKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        DepthKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -91,7 +92,7 @@ namespace prop {
     class OpaKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        OpaKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        OpaKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -109,7 +110,7 @@ namespace prop {
     class HSVKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        HSVKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        HSVKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -131,7 +132,7 @@ namespace prop {
     class PoseKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        PoseKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        PoseKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool, bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -148,7 +149,7 @@ namespace prop {
     class FFDKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        FFDKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        FFDKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool, bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -165,7 +166,7 @@ namespace prop {
     class ImageKeyGroup: public KeyGroup {
         Q_OBJECT
     public:
-        ImageKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, ViaPoint& aViaPoint);
+        ImageKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth, ViaPoint& aViaPoint, GUIResources* mGUIResources);
         void setKeyEnabled(bool);
         void setKeyExists(bool, bool);
         void setKeyValue(const core::TimeKey* aKey);
@@ -186,7 +187,7 @@ namespace prop {
     class CurrentKeyPanel: public Panel {
         Q_OBJECT
     public:
-        CurrentKeyPanel(ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent);
+        CurrentKeyPanel(ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent, GUIResources* mGUIResources);
         void setTarget(core::ObjectNode* aTarget);
         void setPlayBackActivity(bool aIsActive);
         void updateKey();
@@ -198,6 +199,7 @@ namespace prop {
         void updateKeyValue();
 
         ViaPoint& mViaPoint;
+        GUIResources* mGUIResources;
         core::Project& mProject;
         core::ObjectNode* mTarget;
         KeyAccessor mKeyAccessor;

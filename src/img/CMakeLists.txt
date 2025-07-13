@@ -22,6 +22,8 @@ add_library(${PROJECT_NAME}
     ResourceNode.cpp ResourceNode.h
     Util.cpp Util.h
         ORAReader.h
+        oraParser.cpp
+        oraParser.h
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
     ..
@@ -29,10 +31,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
     AE_MAJOR_VERSION=1
-    AE_MICRO_VERSION=1
-    AE_MINOR_VERSION=6
+    AE_MICRO_VERSION=0
+    AE_MINOR_VERSION=7
     AE_PROJECT_FORMAT_MAJOR_VERSION=0
-    AE_PROJECT_FORMAT_MINOR_VERSION=7
+    AE_PROJECT_FORMAT_MINOR_VERSION=8
     AE_PROJECT_FORMAT_OLDEST_MAJOR_VERSION=0
     AE_PROJECT_FORMAT_OLDEST_MINOR_VERSION=4
     USE_GL_CORE_PROFILE

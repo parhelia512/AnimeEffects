@@ -274,10 +274,9 @@ namespace gui::res {
         if (fileInfo.suffix() == "psd") {
             return createPsdTree(aFilePath, aLoadImage);
         }
-        else if(fileInfo.suffix() == "ora"){
+        if (fileInfo.suffix() == "ora") {
             return createOraTree(aFilePath, aLoadImage);
-        }
-        else {
+        } else {
             return createQImageTree(aFilePath, aLoadImage);
         }
     }

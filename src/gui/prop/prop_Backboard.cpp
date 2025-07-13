@@ -3,11 +3,12 @@
 namespace gui {
 namespace prop {
 
-    Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent):
+    Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent, GUIResources* aGUIResources):
         QWidget(aParent),
         mViaPoint(aViaPoint),
         mProject(),
         mLayout(),
+        mGUIResources(aGUIResources),
         mConstantPanel(),
         mDefaultKeyPanel(),
         mCurrentKeyPanel() {
@@ -18,8 +19,7 @@ namespace prop {
         if (mLayout)
             delete mLayout;
         mLayout = new QVBoxLayout();
-        mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-        mLayout->setSpacing(0);
+        mLayout->setSpacing(1);
         mLayout->setContentsMargins(2, 2, 2, 2);
         this->setLayout(mLayout);
     }
@@ -42,7 +42,7 @@ namespace prop {
             mLayout->addWidget(mDefaultKeyPanel.data());
             mLayout->setAlignment(mDefaultKeyPanel.data(), Qt::AlignTop);
 
-            mCurrentKeyPanel.reset(new CurrentKeyPanel(mViaPoint, *mProject, "Null", this));
+            mCurrentKeyPanel.reset(new CurrentKeyPanel(mViaPoint, *mProject, "Null", this, mGUIResources));
             mLayout->addWidget(mCurrentKeyPanel.data());
             mLayout->setAlignment(mCurrentKeyPanel.data(), Qt::AlignTop);
         }

@@ -5,6 +5,11 @@
 #include "util/SelectArgs.h"
 #include "cmnd/ScopedMacro.h"
 #include "gui/prop/prop_Items.h"
+#include "GUIResources.h"
+#include "util/Easing.h"
+#include <QDialog>
+#include <QToolButton>
+#include "gui/prop/splineWidget.h"
 
 namespace gui {
 namespace prop {
@@ -144,12 +149,12 @@ namespace prop {
     }
 
     //-------------------------------------------------------------------------------------------------
-    EasingItem::EasingItem(QWidget* aParent): mLayout(), mBox(), mDBox(), mStamp(), mSignal(true) {
-        mLayout = new QHBoxLayout();
+    EasingItem::EasingItem(QWidget* aParent, const GUIResources* mGUIResources): mLayout(), mBox(), mDBox(), mStamp(), mSignal(true) {
+        mLayout = new QGridLayout();
 
         for (int i = 0; i < 2; ++i) {
             mBox[i] = new QComboBox(aParent);
-            mLayout->addWidget(mBox[i]);
+            mLayout->addWidget(mBox[i], 0, i);
             mBox[i]->connect(mBox[i], util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]() {
                 this->onEditingFinished();
                 mBox[i]->clearFocus();
@@ -157,7 +162,7 @@ namespace prop {
         }
 
         mDBox = new DoubleSpinBox(aParent);
-        mLayout->addWidget(mDBox);
+        mLayout->addWidget(mDBox, 1, 0);
         mDBox->connect(mDBox, &QAbstractSpinBox::editingFinished, [=]() {
             this->onEditingFinished();
             if (!mDBox->mTriggeredByArrows) {
@@ -173,6 +178,25 @@ namespace prop {
         );
         mDBox->setRange(0.0f, 1.0f);
         mDBox->setSingleStep(0.1);
+
+        // Custom spline
+        mCustomEasing = new QPushButton;
+        mLayout->addWidget(mCustomEasing, 1, 1, 1, 3);
+        mCustomEasing->setIcon(mGUIResources->icon("ease"));
+        mCustomEasing->setText(QCoreApplication::tr("Custom"));
+        mCustomEasing->setToolTip(QCoreApplication::tr("Bezier editor"));
+        mCustomEasing->connect(mCustomEasing, &QToolButton::clicked, [=]() {
+            mBox[0]->setCurrentIndex(util::Easing::Type_Custom);
+            auto* splineWidgetClass = new Ui_splineWidget();
+            auto* splineWidget = new QDialog();
+            auto* cubicBezier = new util::Easing::CubicBezier(mCubicBezier);
+            splineWidgetClass->setupUi(splineWidget, mGUIResources, cubicBezier);
+            const auto result = splineWidget->exec();
+            if (result == QDialog::Accepted) {
+                mCubicBezier = *cubicBezier;
+                onValueUpdated(mStamp, value());
+            }
+        });
 
         mStamp = value();
     }
@@ -205,6 +229,7 @@ namespace prop {
         param.type = (util::Easing::Type)mBox[0]->currentIndex();
         param.range = (util::Easing::Range)mBox[1]->currentIndex();
         param.weight = mDBox->value();
+        param.cubicBezier = mCubicBezier;
         return param;
     }
 
@@ -213,6 +238,7 @@ namespace prop {
         mBox[0]->setCurrentIndex(aValue.type);
         mBox[1]->setCurrentIndex(aValue.range);
         mDBox->setValue(aValue.weight);
+        mCubicBezier = aValue.cubicBezier;
         mStamp = aValue;
         mSignal = true;
     }

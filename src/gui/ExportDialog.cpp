@@ -61,14 +61,18 @@ void ExportDialog::pushSizeBox(QFormLayout& aLayout) {
         auto fix = new QCheckBox();
         x->setRange(1, 32767);
         y->setRange(1, 32767);
-        if (!(mCommonParam.size.width() % 2 == 0) || !(mCommonParam.size.height() % 2 == 0)) {
-            MainWindow::showInfoPopup(
-                tr("Value is Odd"),
-                tr("The width or height of the image ends with an odd number. "
-                   "Please change these parameters to an even number as they may cause the export to fail."),
-                "Warn"
-            );
-            mWarningShown = true;
+        QSettings settings;
+        bool ignore_warning = settings.value("export_ignore_warnings").isValid()? settings.value("export_ignore_warnings").toBool() : false;
+        if (!ignore_warning) {
+            if (!(mCommonParam.size.width() % 2 == 0) || !(mCommonParam.size.height() % 2 == 0)) {
+                MainWindow::showInfoPopup(
+                    tr("Value is Odd"),
+                    tr("The width or height of the image ends with an odd number. "
+                       "Please change these parameters to an even number as they may cause the export to fail."),
+                    "Warn"
+                );
+                mWarningShown = true;
+            }
         }
         x->setValue(mCommonParam.size.width());
         y->setValue(mCommonParam.size.height());

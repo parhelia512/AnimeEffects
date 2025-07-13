@@ -94,7 +94,7 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
         mReconstructAction = new QAction(tr("Add missing resources"), this);
         mReconstructAction->connect(mReconstructAction, &QAction::triggered, this, &ObjectTreeWidget::onObjectReconstructionTriggered);
 
-        mAddTreeAction = new QAction(tr("Add new PSD"), this);
+        mAddTreeAction = new QAction(tr("Add new resources"), this);
         mAddTreeAction->connect(mAddTreeAction, &QAction::triggered, this, &ObjectTreeWidget::onAddTreeTriggered);
 
         mRenameAction = new QAction(tr("Rename"), this);
@@ -489,6 +489,9 @@ void ObjectTreeWidget::addItems(QStringList targets = QStringList()) {
                     // This is what sleep deprivation does to someone
                     qDebug() << "Filetree " << QFileInfo(tree.filePath).baseName() << " found for the selected node.";
                     img::ResourceNode* topNode = tree.topNode;
+                    if (topNode->children().empty()) {
+                        getResChild(topNode, &resources);
+                    }
                     for (const auto child: topNode->children()) {
                         getResChild(child, &resources);
                     }
@@ -544,7 +547,7 @@ void ObjectTreeWidget::addItems(QStringList targets = QStringList()) {
 
 void ObjectTreeWidget::onAddTreeTriggered(bool) {
     if (mActionItem) {
-        obj::Item* objItem = obj::Item::cast(mActionItem);
+        const obj::Item* objItem = obj::Item::cast(mActionItem);
         // get children for current nodes and the resource and then add the missing resources
         QVector<resource> resources;
         QVector<QString> currentResources;
@@ -590,7 +593,7 @@ void ObjectTreeWidget::onAddTreeTriggered(bool) {
             formLayout = new QFormLayout(treeScrollWidget);
             formLayout->setObjectName("formLayout");
 
-            for (auto treeName : treeNames) {
+            for (const auto& treeName : treeNames) {
                 treeCheckBoxes.append(new QCheckBox(treeScrollWidget));
                 QSizePolicy sizePolicy(QSizePolicy::Policy::MinimumExpanding, QSizePolicy::Policy::MinimumExpanding);
                 sizePolicy.setHeightForWidth(treeCheckBoxes.last()->sizePolicy().hasHeightForWidth());
@@ -608,7 +611,6 @@ void ObjectTreeWidget::onAddTreeTriggered(bool) {
                 QStringList selectedTrees;
                 for (auto treeCheckBox : treeCheckBoxes) {
                     qDebug() << treeCheckBox->text();
-                    qDebug("Fuck");
                     if (treeCheckBox->isChecked()) {
                         selectedTrees.append(treeCheckBox->text());
                     }

@@ -9,6 +9,9 @@
 #include "core/FolderNode.h"
 #include "core/ObjectNodeUtil.h"
 #include "ctrl/ImageFileLoader.h"
+
+#include "img/oraParser.h"
+
 #include <QMessageBox>
 
 using namespace core;
@@ -40,6 +43,17 @@ img::ResourceNode* createLayerResource(const layer& aLayer){
     resNode->data().setPos(imagePair.second.topLeft());
     resNode->data().setIsLayer(true);
     resNode->data().setBlendMode(ORAReader::oraBlendToPSDBlend(aLayer.composite_op.blend));
+    resNode->data().setIsVisible(aLayer.isVisible);
+    return resNode;
+}
+
+img::ResourceNode* createLayerResource(const layerStack& aLayer){
+    auto imagePair = img::Util::createTextureImage(aLayer.image);
+    auto resNode = new img::ResourceNode(QString::fromStdString(aLayer.name));
+    resNode->data().grabImage(imagePair.first, imagePair.second.size(), img::Format_RGBA8);
+    resNode->data().setPos(imagePair.second.topLeft());
+    resNode->data().setIsLayer(true);
+    resNode->data().setBlendMode(oraParser::oraBlendToPSDBlend(aLayer.composite.blend));
     resNode->data().setIsVisible(aLayer.isVisible);
     return resNode;
 }
@@ -139,6 +153,7 @@ bool ImageFileLoader::loadImage(core::Project& aProject, util::IProgressReporter
 
         // create layer resource (Note that the rect be modified.)
         auto resNode = img::Util::createResourceNode(image, name, true);
+        resNode->data().setPos(image.rect().topLeft());
         resTree->children().pushBack(resNode);
 
         // create layer node
@@ -444,59 +459,186 @@ bool ImageFileLoader::loadOra(Project& aProject, util::IProgressReporter& aRepor
             mLog = "Success";
             return true;
         }
-        else{
-            aReporter.setProgress(50);
-            ORAReader reader = ORAReader(oraFile);
-            if(!reader.initialize()){ return false; }
-            aReporter.setProgress(100);
-            reader.printSelf();
-            // update reporter
-            aReporter.setSection(QCoreApplication::translate("Image Loader", "Building object trees..."));
-            aReporter.setMaximum(reader.image.layerNumber); // Progress reported by stack size and not layer number
-            aReporter.setProgress(0);
-            int* progress = new int{0};
-            auto canvasSize = mForceCanvasSize ? mCanvasSize : QSize(reader.image.w, reader.image.h);
-            QImage image = QImage::fromData(QByteArray::fromStdString(oraFile->read("mergedimage.png")));
-            if (image.isNull()) {
-                mLog =
-                    "Unable to get data from merged image, the file is either corrupted or does not follow the "
-                    "openRaster spec.";
-                return false;
-            }
-            if (image.size() != QSize(reader.image.w, reader.image.h)) {
-                mLog = "Merged image size is not equal to the size declared on stack.xml, invalid file.";
-                return false;
-            }
-            aProject.attribute().setImageSize(canvasSize);
-            // create tree top node
-            FolderNode* topNode = createTopNode(mFileInfo.baseName(), QRect(QPoint(), canvasSize));
-            aProject.objectTree().grabTopNode(topNode);
-            // tree stack
-            std::vector<FolderNode*> treeStack;
-            treeStack.resize(reader.image.mainStack.folders.size() + 1);
-            treeStack.push_back(topNode);
-            auto* globalDepth = new float{0.0f};
-            auto* ID = new int{0};
-            // resource tree stack
-            std::vector<img::ResourceNode*> resStack;
-            resStack.resize(reader.image.globalID + 1);
-            resStack.push_back(createFolderResource("topnode", QPoint(0, 0)));
-            aProject.resourceHolder().pushImageTree(*resStack.back(), mFileInfo.absoluteFilePath());
-            // Parse mainStack
-            aReporter.setProgress(*progress);
-            reader.image.mainStack.isRoot = true;
-            reader.image.mainStack.name = reader.oraFile->get_filename();
-            reader.image.mainStack.sortID = *ID;
-            parseOraStack(reader.image.mainStack, treeStack, resStack, globalDepth, reader.image.rect, &aProject, progress, aReporter);
-            setDefaultPosturesFromInitialRects(*topNode);
-            // setup default positions
-            mLog = "Success";
-            aReporter.setMaximum(1);
-            aReporter.setProgress(1);
-            delete progress;
-            delete globalDepth;
-            return true;
+        #ifdef NEW_ORA_PARSER
+        aReporter.setProgress(25);
+        auto reader = oraParser(oraFile);
+        aReporter.setProgress(50);
+        if (!reader.initialize()) {
+            return false;
         }
+        aReporter.setProgress(100);
+        reader.printSelf();
+        // helpers
+        const auto* image = &reader.oraImage.oraImage;
+        auto* layers = &reader.oraImage.layers;
+        // update reporter
+        aReporter.setSection(QCoreApplication::translate("Image Loader", "Building object trees..."));
+        aReporter.setMaximum(image->layerNumber);
+        aReporter.setProgress(0);
+        auto progress = new int{0};
+        auto canvasSize = mForceCanvasSize ? mCanvasSize : QSize(image->width, image->height);
+        QImage img = QImage::fromData(QByteArray::fromStdString(oraFile->read("mergedimage.png")));
+        if (img.isNull()) {
+            mLog =
+                "Unable to get data from merged image, the file is either corrupted or does not follow the "
+                "openRaster spec.";
+            return false;
+        }
+        if (img.size() != QSize(image->width, image->height)) {
+            mLog = "Merged image size is not equal to the size declared on stack.xml, invalid file.";
+            return false;
+        }
+        aProject.attribute().setImageSize(canvasSize);
+        // create tree top node
+        FolderNode* topNode = createTopNode(mFileInfo.baseName(), QRect(QPoint(), canvasSize));
+        aProject.objectTree().grabTopNode(topNode);
+        // tree stack
+        std::vector<FolderNode*> treeStack;
+        treeStack.push_back(topNode);
+        float globalDepth = 0.0f;
+        // resource tree stack
+        std::vector<img::ResourceNode*> resStack;
+        resStack.push_back(createFolderResource("topnode", QPoint(0, 0)));
+        aProject.resourceHolder().pushImageTree(*resStack.back(), mFileInfo.absoluteFilePath());
+        // Parse mainStack
+        aReporter.setProgress(*progress);
+        QVector<int> skipped;
+        //FolderNode* prev = treeStack.back();
+        QVector<FolderNode*> prev;
+        QVector<img::ResourceNode*> resPrev;
+        // img::ResourceNode* resPrev = resStack.back();
+        FolderNode* current = treeStack.back();
+        img::ResourceNode* resCurrent = resStack.back();
+        // for each layer
+        for (const auto& lyr: *layers) {
+            if (!skipped.empty()) {
+                skipped.back() -= 1;
+                if (skipped.back() == 0) {
+                    current->setInitialRect(calculateBoundingRectFromChildren(*current));
+                    current = prev.back();
+                    resCurrent = resPrev.back();
+                    skipped.pop_back();
+                    prev.pop_back();
+                    resPrev.pop_back();
+                }
+            }
+            XC_PTR_ASSERT(current);
+            XC_PTR_ASSERT(resCurrent);
+            const float* parentDepth = new float{ObjectNodeUtil::getInitialWorldDepth(*current)};
+            // create a folder resource
+            if(lyr.type == IMAGE){
+                auto resNode = createLayerResource(lyr);
+                resCurrent->children().pushBack(resNode);
+                // create layer node
+                auto* layerNode = new LayerNode(QString::fromStdString(lyr.name), aProject.objectTree().shaderHolder());
+                layerNode->setVisibility(lyr.isVisible);
+                layerNode->setClipped(false); // unsupported for now
+                layerNode->setInitialRect(lyr.rect);
+                layerNode->setDefaultImage(resNode->handle());
+                layerNode->setDefaultDepth(globalDepth - *parentDepth);
+                layerNode->setDefaultOpacity(lyr.opacity);
+                layerNode->setBlendMode(oraParser::oraBlendToPSDBlend(lyr.composite.blend));
+                // push back
+                current->children().pushBack(layerNode);
+                *progress+= 1;
+                aReporter.setProgress(*progress);
+                // update depth and ID
+                globalDepth -= 1.0f;
+            }
+            // parse child folders
+            if (lyr.type == FOLDER){
+                prev.append(current);
+                resPrev.append(resCurrent);
+                skipped.append(0);
+                // create node
+                auto resNode = createFolderResource(QString::fromStdString(lyr.name), lyr.rect.topLeft());
+                resCurrent->children().pushBack(resNode);
+                resStack.push_back(resNode);
+                // create folder node
+                auto* folderNode = new FolderNode(QString::fromStdString(lyr.name));
+                folderNode->setVisibility(lyr.isVisible);
+                folderNode->setClipped(false);
+                folderNode->setDefaultDepth(globalDepth - *parentDepth);
+                folderNode->setDefaultOpacity(lyr.opacity);
+                // push tree
+                current->children().pushBack(folderNode);
+                treeStack.back() = folderNode;
+                // update depth and ID
+                globalDepth -= 1.0f;
+                skipped.back() = lyr.capacity + 1;
+                // update vars
+                current = treeStack.back();
+                resCurrent = resStack.back();
+            }
+            treeStack.back()->setInitialRect(calculateBoundingRectFromChildren(*treeStack.back()));
+        }
+
+        setDefaultPosturesFromInitialRects(*topNode);
+        // setup default positions
+        mLog = "Success";
+        aReporter.setMaximum(1);
+        aReporter.setProgress(1);
+        delete progress;
+        return true;
+        #endif
+
+        #ifdef OLD_ORA_PARSER
+        aReporter.setProgress(50);
+        ORAReader reader = ORAReader(oraFile);
+        if (!reader.initialize()) {
+            return false;
+        }
+        aReporter.setProgress(100);
+        reader.printSelf();
+        // update reporter
+        aReporter.setSection(QCoreApplication::translate("Image Loader", "Building object trees..."));
+        aReporter.setMaximum(reader.image.layerNumber); // Progress reported by stack size and not layer number
+        aReporter.setProgress(0);
+        int* progress = new int{0};
+        auto canvasSize = mForceCanvasSize ? mCanvasSize : QSize(reader.image.w, reader.image.h);
+        QImage image = QImage::fromData(QByteArray::fromStdString(oraFile->read("mergedimage.png")));
+        if (image.isNull()) {
+            mLog =
+                "Unable to get data from merged image, the file is either corrupted or does not follow the "
+                "openRaster spec.";
+            return false;
+        }
+        if (image.size() != QSize(reader.image.w, reader.image.h)) {
+            mLog = "Merged image size is not equal to the size declared on stack.xml, invalid file.";
+            return false;
+        }
+        aProject.attribute().setImageSize(canvasSize);
+        // create tree top node
+        FolderNode* topNode = createTopNode(mFileInfo.baseName(), QRect(QPoint(), canvasSize));
+        aProject.objectTree().grabTopNode(topNode);
+        // tree stack
+        std::vector<FolderNode*> treeStack;
+        treeStack.resize(reader.image.mainStack.folders.size() + 1);
+        treeStack.push_back(topNode);
+        auto* globalDepth = new float{0.0f};
+        auto* ID = new int{0};
+        // resource tree stack
+        std::vector<img::ResourceNode*> resStack;
+        resStack.resize(reader.image.globalID + 1);
+        resStack.push_back(createFolderResource("topnode", QPoint(0, 0)));
+        aProject.resourceHolder().pushImageTree(*resStack.back(), mFileInfo.absoluteFilePath());
+        // Parse mainStack
+        aReporter.setProgress(*progress);
+        reader.image.mainStack.isRoot = true;
+        reader.image.mainStack.name = reader.oraFile->get_filename();
+        reader.image.mainStack.sortID = *ID;
+        parseOraStack(
+            reader.image.mainStack, treeStack, resStack, globalDepth, reader.image.rect, &aProject, progress, aReporter
+        );
+        setDefaultPosturesFromInitialRects(*topNode);
+        // setup default positions
+        mLog = "Success";
+        aReporter.setMaximum(1);
+        aReporter.setProgress(1);
+        delete progress;
+        delete globalDepth;
+        return true;
+        #endif
     }
     if(loadMerged.clickedButton() == cancelButton){
         mLog = "User cancelled image load";

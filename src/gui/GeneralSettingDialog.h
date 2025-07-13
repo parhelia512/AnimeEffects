@@ -2,12 +2,12 @@
 #define GUI_GENERALSETTINGDIALOG_H
 
 #include "gui/GUIResources.h"
-#include <QComboBox>
 #include <QCheckBox>
 #include <QFormLayout>
 #include "gui/EasyDialog.h"
-#include "core/TimeFormat.h"
-#include "qspinbox.h"
+#include <QSpinBox>
+#include <QTabWidget>
+#include <QComboBox>
 
 namespace gui {
 
@@ -35,7 +35,9 @@ public:
     bool cbCopyHasChanged();
     bool keyDelayHasChanged();
     QString theme();
-
+    static QString getFFmpeg();
+    static bool ffmpegCheck(const QString& ffmpeg, GeneralSettingDialog* generalSettingsDialog);
+    static void ffmpegCheckFailed(GeneralSettingDialog* aDialog);
 private:
     void saveSettings();
 
@@ -98,7 +100,6 @@ private:
 
     GUIResources& mGUIResources;
 };
-
 } // namespace gui
 
 #endif // GUI_GENERALSETTINGDIALOG_H

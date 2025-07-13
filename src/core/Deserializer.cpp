@@ -120,10 +120,20 @@ void Deserializer::read(Frame& aValue) {
 }
 
 bool Deserializer::read(util::Easing::Param& aValue, bool errorCorrection) {
-
+    // Future: This will bite me in the ass later...
+    bool postBezier = mVersion >= QVersionNumber(0, 8);
     aValue.type = (util::Easing::Type)mIn.readSInt32();
     aValue.range = (util::Easing::Range)mIn.readSInt32();
     aValue.weight = mIn.readFloat32();
+    if (postBezier) {
+        aValue.cubicBezier.x1 = mIn.readFloat32();
+        aValue.cubicBezier.y1 = mIn.readFloat32();
+        aValue.cubicBezier.x2 = mIn.readFloat32();
+        aValue.cubicBezier.y2 = mIn.readFloat32();
+    }
+    else {
+        aValue.cubicBezier = util::Easing::CubicBezier();
+    }
     if(!aValue.isValidParam() && errorCorrection){
         aValue = util::Easing::Param();
         qDebug("Correcting bytes.");

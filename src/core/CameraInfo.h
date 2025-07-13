@@ -15,6 +15,10 @@ class CameraInfo {
 public:
     CameraInfo();
 
+    void setFlip(bool flp) {
+        flip = flp;
+    }
+    bool flip = false;
     void reset(const QSize& aScreenSize, double aDpr, const QSize& aImageSize, const QPoint& aLeftTopPos);
 
     void setDevicePixelRatio(double aRatio);

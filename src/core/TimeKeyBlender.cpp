@@ -311,10 +311,11 @@ float getEasingRateFromTwoKeys(const TimeKeyGatherer& aGatherer) {
     const float frame = p1.relativeFrame - p0.relativeFrame;
     XC_ASSERT(frame != 0.0f);
 
-    const tKey* k0 = (const tKey*)p0.key;
+    const tKey* k0 = static_cast<const tKey*>(p0.key);
 
+    const util::Easing::Param& easing = k0->data().easing();
     // calculate easing
-    return util::Easing::calculate(k0->data().easing(), -p0.relativeFrame, 0.0f, 1.0f, frame);
+    return util::Easing::calculate(easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
 }
 
 template<class tKey, TimeKeyType tType>

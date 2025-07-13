@@ -147,6 +147,11 @@ void ToolWidget::createViewPanel() {
             this->viewSetting().rotateViewCW = false;
         }
     );
+
+    mViewPanel->addButton("flip", true, tr("Flip canvas"), [=](bool aChecked) {
+        this->viewSetting().flipCanvas = aChecked;
+        this->onViewSettingChanged(this->viewSetting());
+    });
 }
 
 void ToolWidget::createModePanel() {

@@ -1,6 +1,6 @@
 QSplitter#propertysplitter {
-    width: 30ex;
-	min-width: 20em;
+    width: 18em;
+    padding-right: 0.4em;
 }
 
 QFrame#holder {
@@ -126,12 +126,12 @@ QPushButton#browser::disabled {
 }
 
 QGroupBox#propertyPanel {
-    background-color: #2d2d2d;
-    border:0em solid transparent;
-    border-radius:0.4em;
-    margin: 0.2em;
-    padding-top: 1.6em;
-    padding-bottom: 0.4em;
+   background-color: #2d2d2d;
+   border:0em solid transparent;
+   border-radius:0.4em;
+   margin: 0.2em;
+   padding-top: 1.6em;
+   padding-bottom: 0.4em;
 }
 
 QGroupBox#propertyPanel::title {

@@ -96,19 +96,23 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
     tool/tool_SRTPanel.cpp tool/tool_SRTPanel.h
     tool/tool_ViewPanel.cpp tool/tool_ViewPanel.h
     ${app_icon}
-        AudioPlaybackWidget.cpp
-        AudioPlaybackWidget.h
+    AudioPlaybackWidget.cpp
+    AudioPlaybackWidget.h
+    prop/splineWidget.cpp
+    prop/splineWidget.h
+        prop/bezierCurveEditor.h
+        prop/bezierCurveEditor.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE
     ..
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    AE_MAJOR_VERSION=1
-    AE_MICRO_VERSION=1
-    AE_MINOR_VERSION=6
+        AE_MAJOR_VERSION=1
+        AE_MINOR_VERSION=7
+        AE_MICRO_VERSION=0
     AE_PROJECT_FORMAT_MAJOR_VERSION=0
-    AE_PROJECT_FORMAT_MINOR_VERSION=7
+    AE_PROJECT_FORMAT_MINOR_VERSION=8
     AE_PROJECT_FORMAT_OLDEST_MAJOR_VERSION=0
     AE_PROJECT_FORMAT_OLDEST_MINOR_VERSION=4
     USE_GL_CORE_PROFILE

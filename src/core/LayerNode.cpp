@@ -36,10 +36,10 @@ LayerNode::LayerNode(const QString& aName, ShaderHolder& aShaderHolder):
 void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle) { setDefaultImage(aHandle, aHandle->blendMode()); }
 
 void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode) {
-    XC_ASSERT(aHandle);
+    /*XC_ASSERT(aHandle);
     XC_PTR_ASSERT(aHandle->image().data());
-    XC_ASSERT(aHandle->image().pixelSize().isValid());
-    if (!aHandle || !aHandle->image().data())
+    XC_ASSERT(aHandle->image().pixelSize().isValid());*/
+    if (!aHandle || !aHandle->image().data() || !aHandle->image().pixelSize().isValid())
         return; // fail safe
 
     auto key = new ImageKey();
