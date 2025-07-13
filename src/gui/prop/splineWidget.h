@@ -97,7 +97,7 @@ public:
         gridLayout_2->addWidget(y2_spin, 3, 4, 1, 1);
 
         spins = {x1_spin, y1_spin, x2_spin, y2_spin};
-        m_editor = new BezierCurveEditor(splineWidget, guiRes->mTheme.isDark(), cubicBezier, spins);
+        m_editor = new BezierCurveEditor(splineWidget, guiRes->mTheme.isDark(), cubicBezier, spins, &progress);
         for (auto spin : spins) {
             spin->setSingleStep(0.01);
             spin->setMaximum(2);
@@ -176,22 +176,22 @@ public:
         gridLayout_2->addWidget(toolButton, 3, 0, 1, 1);
 
         // Fuck it, we ball. These numbers are picked for increased smoothness and also to make this easier to code lol
-        float accuracy = 10000000.0f;
-        float progressAccuracy = 1000.0f;
+        constexpr float accuracy = 10000000.0f;
+        constexpr float progressAccuracy = 1000.0f;
         progressBar = new QProgressBar(splineWidget);
         progressBar->setValue(0);
         progressBar->setMinimum(0.0);
-        progressBar->setMaximum(accuracy);
-        progressBar->setTextVisible(false);
+        progressBar->setMaximum(static_cast<int>(accuracy));
+        progressBar->setFormat("Preview");
         progressBar->setObjectName("progressBar");
 
         gridLayout_2->addWidget(progressBar, 6, 0, 1, 6);
 
-        QTimer *timer = new QTimer(splineWidget);
-        timer->connect(timer, &QTimer::timeout, [=] {
+        auto *timer = new QTimer(splineWidget);
+        QTimer::connect(timer, &QTimer::timeout, [=] {
             progress++;
             // The addition is for extra time so the animation is smoother
-            if (progress >= progressAccuracy + 125) {
+            if (static_cast<float>(progress) >= progressAccuracy + 125) {
                 progress = 0;
             }
             /*qDebug("---");
@@ -203,14 +203,14 @@ public:
                 {cubicBezier->y1, cubicBezier->y2},
                 {1.0, 1.0}
                 );
-            float easingProgress = easing.valueForProgress(progress / progressAccuracy);
+            const double easingProgress = easing.valueForProgress(static_cast<double>(progress) / progressAccuracy);
             /*qDebug() << easingProgress;
             qDebug("---");*/
-            progressBar->setValue(easingProgress * accuracy);
+            progressBar->setValue(static_cast<int>(easingProgress * accuracy));
         });
-        timer->start(4);
+        timer->start(2);
 
-        timer->connect(splineWidget, &QDialog::finished, [=]() {
+        QTimer::connect(splineWidget, &QDialog::finished, [=]() {
             timer->stop();
             timer->deleteLater();
         });
