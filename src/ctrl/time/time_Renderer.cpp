@@ -100,8 +100,7 @@ namespace time {
             const QPoint rb = lt + QPoint(mScale->maxPixelWidth(), aHeight);
 
             const TimeFormat timeFormat(mRange, aFps);
-            const TimeFormatType timeFormatVar =
-                static_cast<TimeFormatType>(settings.value("generalsettings/ui/timeformat").toInt());
+            const TimeFormatType timeFormatVar = static_cast<TimeFormatType>(settings.value("generalsettings/ui/timeformat").toInt());
 
             mPainter.setPen(QPen(kBrush, 1));
 
