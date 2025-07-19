@@ -917,10 +917,10 @@ void MainWindow::onCloseProjectTriggered() {
             }
         }
 
-        auto playerBackup = *mCurrent->mediaPlayer;
-        auto configBackup = *mCurrent->pConf;
+        const auto playerBackup = *mCurrent->mediaPlayer;
+        const auto configBackup = *mCurrent->pConf;
 
-        auto closeProject = mCurrent;
+        const auto closeProject = mCurrent;
         mProjectTabBar->removeProject(*closeProject);
         resetProjectRefs(nullptr); ///@note update mCurrent
         mSystem.closeProject(*closeProject);

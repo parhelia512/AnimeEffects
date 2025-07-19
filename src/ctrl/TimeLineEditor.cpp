@@ -768,7 +768,7 @@ void TimeLineEditor::render(
     const int bgn = mTimeScale.frame(cullRect.left() - margin - 5);
     const int end = mTimeScale.frame(cullRect.right() - margin + 5);
 
-    time::Renderer renderer(aPainter, aCamera, aTheme);
+    time::Renderer renderer(aPainter, aCamera, aTheme, timelineFormat);
     renderer.setMargin(margin);
     renderer.setRange(util::Range(bgn, end));
     renderer.setTimeScale(mTimeScale);

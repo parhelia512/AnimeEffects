@@ -47,7 +47,7 @@ private:
     GUIResources& mResources;
 
     core::Project* mProject;
-    PlayBackWidget* mPlayBack;
+    PlayBackWidget* mPlayBack{};
 
     // IO OPS EVERY FRAME BAD //
     QSettings mSettings;

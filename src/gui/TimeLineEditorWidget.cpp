@@ -569,7 +569,8 @@ void TimeLineEditorWidget::onCopyCBTriggered(bool) {
 void TimeLineEditorWidget::onPasteKeyTriggered(bool) {
     mOnPasting = true;
     if (!mEditor->pasteCopiedKeys(mCopyTargets, mPastePos)) {
-        QMessageBox::warning(nullptr, tr("Operation Error"), tr("Failed to paste keys."));
+        QMessageBox::warning(nullptr, tr("Operation Error"), tr("Failed to paste keys. "
+        "\n(If you want to paste across objects copy the key to the clipboard and right-click and paste to the node instead)"));
     }
     mOnPasting = false;
 }

@@ -5,8 +5,9 @@ using namespace core;
 namespace ctrl {
 namespace time {
 
-    Renderer::Renderer(QPainter& aPainter, const CameraInfo& aCamera, const theme::TimeLine& aTheme):
-        mPainter(aPainter), mCamera(aCamera), mTheme(aTheme), mMargin(), mRange(), mScale() {}
+    Renderer::Renderer(QPainter& aPainter, const CameraInfo& aCamera, const theme::TimeLine& aTheme,
+        const TimeFormatType& timeFormat):
+        mPainter(aPainter), mCamera(aCamera), mTheme(aTheme), mMargin(), mRange(), mScale(), timeFormatVar(timeFormat){}
 
     void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCameraRect, const QRect& aCullRect) {
         // draw each line
@@ -42,8 +43,8 @@ namespace time {
                 for (int i = 1; i < sepa; ++i) {
                     const float h = static_cast<float>(rect.height()) / sepa;
                     const float y = rect.top() + i * h;
-                    const QPointF v0(rect.left(), static_cast<double>(y));
-                    const QPointF v1(rect.right(), static_cast<double>(y));
+                    const QPointF v0(rect.left(), y);
+                    const QPointF v1(rect.right(), y);
                     mPainter.drawLine(v0, v1);
                 }
 
@@ -77,7 +78,6 @@ namespace time {
 
     void Renderer::renderHeader(int aHeight, int aFps) {
         const QRect cameraRect(-mCamera.leftTopPos().toPoint(), mCamera.screenSize());
-        const QSettings settings;
 
         mPainter.setRenderHint(QPainter::Antialiasing, false);
 
@@ -98,9 +98,7 @@ namespace time {
             const int numberWidth = 6;
             const QPoint lt(mMargin, cameraRect.top());
             const QPoint rb = lt + QPoint(mScale->maxPixelWidth(), aHeight);
-
             const TimeFormat timeFormat(mRange, aFps);
-            const TimeFormatType timeFormatVar = static_cast<TimeFormatType>(settings.value("generalsettings/ui/timeformat").toInt());
 
             mPainter.setPen(QPen(kBrush, 1));
 
@@ -112,7 +110,7 @@ namespace time {
 
                 if (attr.showNumber) {
                     QString number = timeFormat.frameToString(i, timeFormatVar);
-                    const int width = numberWidth * number.size();
+                    const int width = static_cast<int>(numberWidth * number.size());
                     const int left = pos.x() - (width >> 1);
                     const int top = lt.y() - 1;
                     const QRect rect(QPoint(left, top), QPoint(left + width + 1, top + numberHeight));
