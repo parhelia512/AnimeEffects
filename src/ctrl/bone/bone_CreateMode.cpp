@@ -1,7 +1,6 @@
 #include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
 #include "core/TimeLine.h"
-#include "ctrl/TimeLineUtil.h"
 #include "ctrl/CmndName.h"
 #include "ctrl/bone/bone_CreateMode.h"
 #include "ctrl/bone/bone_Renderer.h"
@@ -65,9 +64,9 @@ namespace bone {
                     } else {
                         // add new top bone
                         Bone2* bone = new Bone2();
-                        bone->setWorldPos(pos, mDangledTop.data());
+                        bone->setWorldPos(pos, mDangledTop.get());
                         mFocuser.select(*bone);
-                        pushNewTopBone(*mDangledTop.take(), *bone);
+                        pushNewTopBone(*mDangledTop.release(), *bone);
                         bone->updateWorldTransform();
                     }
                 }
