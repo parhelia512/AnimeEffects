@@ -66,14 +66,14 @@ public:
     virtual void renderClipper(const RenderInfo&, const TimeCacheAccessor&, uint8 aClipperId);
     virtual void setClipped(bool aIsClipped);
     virtual bool isClipped() const { return mIsClipped; }
-    virtual void renderHSV(const RenderInfo& aInfo, const TimeCacheAccessor&, QList<int> HSVData);
     virtual bool hasBlendMode() const { return true; }
     virtual img::BlendMode blendMode() const;
     virtual void setBlendMode(img::BlendMode);
-
-private:
+    
+    private:
     void transformShape(const RenderInfo& aInfo, const TimeCacheAccessor&);
-    void renderShape(const RenderInfo& aInfo, const TimeCacheAccessor&);
+    void renderLayer(const RenderInfo& aInfo, const TimeCacheAccessor&, bool useHSV, QList<int> HSVData);
+    void renderHSV(const RenderInfo& aInfo, const TimeCacheAccessor&, QList<int> HSVData);
     void renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor&);
     bool isClipper() const;
     QString mName;

@@ -155,21 +155,15 @@ void LayerNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAccess
     if (aAccessor.get(mTimeLine).opa().isZero())
         return;
 
-    // render shape
-    renderShape(aInfo, aAccessor);
+    bool useHSV = !mTimeLine.isEmpty(TimeKeyType_HSV) && aInfo.time.frame.get() >= mTimeLine.map(TimeKeyType_HSV).values().first()->frame();
+
+    renderLayer(aInfo, aAccessor, useHSV, useHSV ? aAccessor.get(mTimeLine).hsv().hsv() : QList<int>{});
+
 
     if (aInfo.isGrid)
         return;
 
-    // render clippees
     renderClippees(aInfo, aAccessor);
-
-    // render hsv
-    if (!mTimeLine.isEmpty(TimeKeyType_HSV)) {
-        if (aInfo.time.frame.get() >= mTimeLine.map(TimeKeyType_HSV).values().first()->frame()) {
-            renderHSV(aInfo, aAccessor, aAccessor.get(mTimeLine).hsv().hsv());
-        }
-    }
 }
 
 void LayerNode::renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor) {
@@ -312,7 +306,7 @@ void LayerNode::transformShape(const RenderInfo& aInfo, const TimeCacheAccessor&
     mCurrentMesh = mesh;
 }
 
-void LayerNode::renderShape(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor) {
+void LayerNode::renderLayer(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, bool useHSV, QList<int> HSVData = {}) {
     if (!mCurrentMesh)
         return;
 
@@ -329,8 +323,7 @@ void LayerNode::renderShape(const RenderInfo& aInfo, const TimeCacheAccessor& aA
     auto blendMode = expans.blendMode();
     const QMatrix4x4 viewMatrix = aInfo.camera.viewMatrix();
 
-
-    auto& shader = aInfo.isGrid ? mShaderHolder.gridShader() : mShaderHolder.shader(blendMode, isClippee);
+    auto& shader = aInfo.isGrid ? mShaderHolder.gridShader() : (!useHSV ? mShaderHolder.shader(blendMode, isClippee) : mShaderHolder.HSVShader());
 
     // update destination color
     XC_PTR_ASSERT(aInfo.destTexturizer);
@@ -366,7 +359,6 @@ void LayerNode::renderShape(const RenderInfo& aInfo, const TimeCacheAccessor& aA
             color = QColor(Qt::black);
 
         shader.bind();
-
         shader.setAttributeBuffer("inPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
         shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
 
@@ -383,6 +375,18 @@ void LayerNode::renderShape(const RenderInfo& aInfo, const TimeCacheAccessor& aA
             shader.setUniformValue("uClippingTexture", 2);
         }
 
+        if (useHSV && !HSVData.isEmpty()) {
+            shader.setUniformValue("setColor", bool(HSVData[3]));
+
+            float hue = (float)HSVData[0] / 360.0f;
+            float saturation = (float)(HSVData[1]) / 100.0f;
+            float value = (float)(HSVData[2]) / 100.0f;
+
+            shader.setUniformValue("hue", hue);
+            shader.setUniformValue("saturation", saturation);
+            shader.setUniformValue("value", value);
+        }
+
         gl::Util::drawElements(mCurrentMesh->primitiveMode(), GL_UNSIGNED_INT, mCurrentMesh->getIndexBuffer());
 
         shader.release();
@@ -390,8 +394,7 @@ void LayerNode::renderShape(const RenderInfo& aInfo, const TimeCacheAccessor& aA
 
     if (aInfo.isGrid) {
         ggl.glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-    else {
+    } else {
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -403,98 +406,7 @@ void LayerNode::renderShape(const RenderInfo& aInfo, const TimeCacheAccessor& aA
 }
 
 void LayerNode::renderHSV(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, QList<int> HSVData) {
-    if (!mCurrentMesh)
-        return;
-    if(HSVData.isEmpty()){ return; }
-    gl::Global::Functions& ggl = gl::Global::functions();
-    const bool isClippee = (aInfo.clippingFrame && aInfo.clippingId != 0);
-
-    auto& expans = aAccessor.get(mTimeLine);
-    if (!expans.areaImageKey() || !expans.areaTexture())
-        return;
-
-    auto textureId = expans.areaTexture()->id();
-    auto blendMode = expans.blendMode();
-    auto textureSize = expans.areaTexture()->size();
-    auto texCoordOffset = mCurrentMesh->originOffset() - expans.imageOffset();
-    const QMatrix4x4 viewMatrix = aInfo.camera.viewMatrix();
-    auto& shader = mShaderHolder.HSVShader();
-    // update destination color
-    XC_PTR_ASSERT(aInfo.destTexturizer);
-    auto destTextureId = aInfo.destTexturizer->texture().id();
-
-    if (!aInfo.isGrid && blendMode != img::BlendMode_Normal) {
-        aInfo.destTexturizer->update(
-            aInfo.framebuffer, aInfo.dest, viewMatrix, *mCurrentMesh, mMeshTransformer.positions()
-        );
-    }
-
-    if (aInfo.isGrid) {
-        ggl.glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } else {
-        // blend func
-        ggl.glEnable(GL_BLEND);
-        ggl.glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
-
-        ggl.glActiveTexture(GL_TEXTURE0);
-        ggl.glBindTexture(GL_TEXTURE_2D, textureId);
-        ggl.glActiveTexture(GL_TEXTURE1);
-        ggl.glBindTexture(GL_TEXTURE_2D, destTextureId);
-
-        if (isClippee) {
-            ggl.glActiveTexture(GL_TEXTURE2);
-            ggl.glBindTexture(GL_TEXTURE_2D, aInfo.clippingFrame->texture().id());
-        }
-    }
-
-    {
-        const float opacity = expans.worldOpacity();
-        QColor color(255, 255, 255, xc_clamp((int)(255 * opacity), 0, 255));
-        if (aInfo.isGrid)
-            color = QColor(Qt::black);
-
-        shader.bind();
-        shader.setAttributeBuffer("inPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
-        shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
-
-        shader.setUniformValue("uViewMatrix", viewMatrix);
-        shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.deviceScreenSize()));
-        shader.setUniformValue("uImageSize", QSizeF(textureSize));
-        shader.setUniformValue("uTexCoordOffset", texCoordOffset);
-        shader.setUniformValue("uDestTexture", 1);
-        shader.setUniformValue("setColor", bool(HSVData[3]));
-
-        float hue = (float)HSVData[0] / 360.0f;
-        float saturation = (float)(HSVData[1]) / 100.0f;
-        float value = (float)(HSVData[2]) / 100.0f;
-
-        shader.setUniformValue("hue", hue);
-        shader.setUniformValue("saturation", saturation);
-        shader.setUniformValue("value", value);
-        shader.setUniformValue("uColor", color);
-        shader.setUniformValue("uTexture", 0);
-
-        if (isClippee) {
-            shader.setUniformValue("uClippingId", (int)aInfo.clippingId);
-            shader.setUniformValue("uClippingTexture", 2);
-        }
-
-        gl::Util::drawElements(mCurrentMesh->primitiveMode(), GL_UNSIGNED_INT, mCurrentMesh->getIndexBuffer());
-
-        shader.release();
-    }
-
-    if (aInfo.isGrid) {
-        ggl.glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    } else {
-        ggl.glActiveTexture(GL_TEXTURE0);
-        ggl.glBindTexture(GL_TEXTURE_2D, 0);
-
-        // blend func
-        ggl.glDisable(GL_BLEND);
-    }
-
-    ggl.glFlush();
+    LayerNode::renderLayer(aInfo, aAccessor, true, HSVData);
 }
 
 cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent) {
