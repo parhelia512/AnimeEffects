@@ -1,8 +1,6 @@
 #include "util/CollDetect.h"
-#include "util/MathUtil.h"
 #include "util/TreeUtil.h"
 #include "cmnd/ScopedMacro.h"
-#include "core/Constant.h"
 #include "ctrl/TimeLineUtil.h"
 #include "ctrl/CmndName.h"
 #include "ctrl/pose/pose_DrawBoneMode.h"

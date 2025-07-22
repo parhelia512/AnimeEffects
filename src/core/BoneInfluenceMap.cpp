@@ -1,7 +1,5 @@
 #include <float.h>
 #include <QtMath>
-#include "XC.h"
-#include "core/Constant.h"
 #include "core/Project.h"
 #include "core/LayerMesh.h"
 #include "core/BoneInfluenceMap.h"
