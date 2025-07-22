@@ -33,7 +33,9 @@ LayerNode::LayerNode(const QString& aName, ShaderHolder& aShaderHolder):
     mCurrentMesh(),
     mClippees() {}
 
-void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle) { setDefaultImage(aHandle, aHandle->blendMode()); }
+void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle) {
+    setDefaultImage(aHandle, aHandle->blendMode());
+}
 
 void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode) {
     /*XC_ASSERT(aHandle);
@@ -55,55 +57,17 @@ void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMo
 }
 
 void LayerNode::setDefaultPosture(const QVector2D& aPos) {
-    {
-        auto key = (MoveKey*)mTimeLine.defaultKey(TimeKeyType_Move);
-        if (!key) {
-            key = new MoveKey();
-            mTimeLine.grabDefaultKey(TimeKeyType_Move, key);
-        }
-        key->data().setPos(aPos);
-    }
-    {
-        auto key = (RotateKey*)mTimeLine.defaultKey(TimeKeyType_Rotate);
-        if (!key) {
-            key = new RotateKey();
-            mTimeLine.grabDefaultKey(TimeKeyType_Rotate, key);
-        }
-    }
-    {
-        auto key = (ScaleKey*)mTimeLine.defaultKey(TimeKeyType_Scale);
-        if (!key) {
-            key = new ScaleKey();
-            mTimeLine.grabDefaultKey(TimeKeyType_Scale, key);
-        }
-    }
+    getOrCreateDefaultKey<MoveKey, TimeKeyType_Move>(mTimeLine)->data().setPos(aPos);
+    getOrCreateDefaultKey<RotateKey, TimeKeyType_Rotate>(mTimeLine);
+    getOrCreateDefaultKey<ScaleKey, TimeKeyType_Scale>(mTimeLine);
 }
 
 void LayerNode::setDefaultDepth(float aValue) {
-    auto key = (DepthKey*)mTimeLine.defaultKey(TimeKeyType_Depth);
-    if (!key) {
-        key = new DepthKey();
-        mTimeLine.grabDefaultKey(TimeKeyType_Depth, key);
-    }
-    key->setDepth(aValue);
+    getOrCreateDefaultKey<DepthKey, TimeKeyType_Depth>(mTimeLine)->setDepth(aValue);
 }
 
 void LayerNode::setDefaultOpacity(float aValue) {
-    auto key = (OpaKey*)mTimeLine.defaultKey(TimeKeyType_Opa);
-    if (!key) {
-        key = new OpaKey();
-        mTimeLine.grabDefaultKey(TimeKeyType_Opa, key);
-    }
-    key->setOpacity(aValue);
-}
-
-void LayerNode::setDefaultHSV(QList<int> aValue) {
-    auto key = (HSVKey*)mTimeLine.defaultKey(TimeKeyType_HSV);
-    if (!key) {
-        key = new HSVKey();
-        mTimeLine.grabDefaultKey(TimeKeyType_HSV, key);
-    }
-    key->setHSV(aValue);
+    getOrCreateDefaultKey<OpaKey, TimeKeyType_Opa>(mTimeLine)->setOpacity(aValue);
 }
 
 float LayerNode::initialDepth() const {
@@ -114,14 +78,10 @@ float LayerNode::initialDepth() const {
 void LayerNode::setClipped(bool aIsClipped) { mIsClipped = aIsClipped; }
 
 bool LayerNode::isClipper() const {
-    if (mIsClipped)
-        return false;
+    if (mIsClipped) return false;
 
     auto prev = this->prevSib();
-    if (!prev || !prev->renderer() || !prev->renderer()->isClipped()) {
-        return false;
-    }
-    return true;
+    return prev && prev->renderer() && prev->renderer()->isClipped();
 }
 
 img::BlendMode LayerNode::blendMode() const {
@@ -149,19 +109,13 @@ void LayerNode::prerender(const RenderInfo& aInfo, const TimeCacheAccessor& aAcc
 
 
 void LayerNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor) {
-    if (!mIsVisible)
-        return;
-
-    if (aAccessor.get(mTimeLine).opa().isZero())
-        return;
+    if (!mIsVisible || aAccessor.get(mTimeLine).opa().isZero()) return;
 
     bool useHSV = !mTimeLine.isEmpty(TimeKeyType_HSV) && aInfo.time.frame.get() >= mTimeLine.map(TimeKeyType_HSV).values().first()->frame();
 
     renderLayer(aInfo, aAccessor, useHSV, useHSV ? aAccessor.get(mTimeLine).hsv().hsv() : QList<int>{});
 
-
-    if (aInfo.isGrid)
-        return;
+    if (aInfo.isGrid) return;
 
     renderClippees(aInfo, aAccessor);
 }
@@ -472,6 +426,7 @@ bool LayerNode::deserialize(Deserializer& aIn) {
     aIn.read(mInitialRect);
     // clipping
     aIn.read(mIsClipped);
+
     // timeline
     if (!mTimeLine.deserialize(aIn))
         return aIn.errored("failed to deserialize time line");

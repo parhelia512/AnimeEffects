@@ -54,7 +54,6 @@ public:
 
 private:
     void renderClippees(const RenderInfo&, const TimeCacheAccessor&);
-    void renderHSVs(const RenderInfo&, const TimeCacheAccessor&, QList<int> aHSV);
     bool isClipper() const;
 
     QString mName;

@@ -33,8 +33,6 @@ public:
     void setDefaultDepth(float aValue);
     // default opacity
     void setDefaultOpacity(float aValue);
-    // default hsv
-    void setDefaultHSV(QList<int> aValue);
 
     // from ObjectNode
     virtual ObjectType type() const { return ObjectType_Layer; }

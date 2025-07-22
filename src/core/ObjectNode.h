@@ -25,6 +25,16 @@ class ResourceEvent;
 
 namespace core {
 
+template <typename KeyType, TimeKeyType keyEnum>
+KeyType* getOrCreateDefaultKey(TimeLine& timeLine) {
+    auto key = static_cast<KeyType*>(timeLine.defaultKey(keyEnum));
+    if (!key) {
+        key = new KeyType();
+        timeLine.grabDefaultKey(keyEnum, key);
+    }
+    return key;
+}
+
 class ObjectNode: public util::TreeNodeBase<ObjectNode>, private util::NonCopyable {
 public:
     typedef util::TreeNodeBase<ObjectNode>::Children ChildrenType;

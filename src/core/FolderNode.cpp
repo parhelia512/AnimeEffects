@@ -22,71 +22,35 @@ FolderNode::FolderNode(const QString& aName):
 FolderNode::~FolderNode() { qDeleteAll(children()); }
 
 void FolderNode::setDefaultPosture(const QVector2D& aPos) {
-    {
-        auto key = (MoveKey*)mTimeLine.defaultKey(TimeKeyType_Move);
-        if (!key) {
-            key = new MoveKey();
-            mTimeLine.grabDefaultKey(TimeKeyType_Move, key);
-        }
-        key->data().setPos(aPos);
-    }
-    {
-        auto key = (RotateKey*)mTimeLine.defaultKey(TimeKeyType_Rotate);
-        if (!key) {
-            key = new RotateKey();
-            mTimeLine.grabDefaultKey(TimeKeyType_Rotate, key);
-        }
-    }
-    {
-        auto key = (ScaleKey*)mTimeLine.defaultKey(TimeKeyType_Scale);
-        if (!key) {
-            key = new ScaleKey();
-            mTimeLine.grabDefaultKey(TimeKeyType_Scale, key);
-        }
-    }
+    getOrCreateDefaultKey<MoveKey, TimeKeyType_Move>(mTimeLine)->data().setPos(aPos);
+    getOrCreateDefaultKey<RotateKey, TimeKeyType_Rotate>(mTimeLine);
+    getOrCreateDefaultKey<ScaleKey, TimeKeyType_Scale>(mTimeLine);
 }
 
 void FolderNode::setDefaultDepth(float aValue) {
-    auto key = (DepthKey*)mTimeLine.defaultKey(TimeKeyType_Depth);
-    if (!key) {
-        key = new DepthKey();
-        mTimeLine.grabDefaultKey(TimeKeyType_Depth, key);
-    }
-    key->setDepth(aValue);
+    getOrCreateDefaultKey<DepthKey, TimeKeyType_Depth>(mTimeLine)->setDepth(aValue);
 }
 
 void FolderNode::setDefaultOpacity(float aValue) {
-    auto key = (OpaKey*)mTimeLine.defaultKey(TimeKeyType_Opa);
-    if (!key) {
-        key = new OpaKey();
-        mTimeLine.grabDefaultKey(TimeKeyType_Opa, key);
-    }
-    key->setOpacity(aValue);
+    getOrCreateDefaultKey<OpaKey, TimeKeyType_Opa>(mTimeLine)->setOpacity(aValue);
 }
 
 void FolderNode::grabHeightMap(HeightMap* aNode) { mHeightMap.reset(aNode); }
 
 bool FolderNode::isClipper() const {
-    if (mIsClipped)
-        return false;
+    if (mIsClipped) return false;
 
     auto prev = this->prevSib();
-    if (!prev || !prev->renderer() || !prev->renderer()->isClipped()) {
-        return false;
-    }
-    return true;
+    return prev && prev->renderer() && prev->renderer()->isClipped();
 }
 
 void FolderNode::prerender(const RenderInfo&, const TimeCacheAccessor&) {}
 
 void pushRenderRecursive(core::ObjectNode& aNode, std::vector<core::Renderer::SortUnit>& aDest,
     const core::TimeCacheAccessor& aAccessor, const core::RenderInfo aInfo) {
-    if (!aNode.isVisible()) {
-        return;
-    }
-    if (!aNode.renderer()) {
-        return;
-    }
+    
+    if (!aNode.isVisible() || !aNode.renderer()) return;
+
     core::Renderer::SortUnit unit;
     unit.renderer = aNode.renderer();
     unit.depth = aAccessor.get(aNode).worldDepth();
@@ -102,30 +66,34 @@ void pushRenderRecursive(core::ObjectNode& aNode, std::vector<core::Renderer::So
 }
 
 void FolderNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor) {
-    if (!mIsVisible)
-        return;
-
-    if (aAccessor.get(mTimeLine).opa().isZero())
-        return;
-
-    if (aInfo.isGrid)
-        return;
+    if (!mIsVisible || aAccessor.get(mTimeLine).opa().isZero() || aInfo.isGrid) return;
 
     // render clippees
     renderClippees(aInfo, aAccessor);
 
-    if (!mTimeLine.isEmpty(TimeKeyType_HSV)) {
-        if (aInfo.time.frame.get() >= mTimeLine.map(TimeKeyType_HSV).values().first()->frame()) {
-            auto children = this->children();
-            for (auto p : children) {
-                while (p) { pushRenderRecursive(*p, mRenders, aAccessor, aInfo); p = p->prevSib(); }
+    if (!mTimeLine.isEmpty(TimeKeyType_HSV) && aInfo.time.frame.get() >= mTimeLine.map(TimeKeyType_HSV).values().first()->frame()) {
+        auto children = this->children();
+        for (auto p : children) {
+            while (p) {
+                pushRenderRecursive(*p, mRenders, aAccessor, aInfo);
+                p = p->prevSib();
             }
-            if(!mRenders.empty()) { std::stable_sort(mRenders.begin(), mRenders.end(),
-                          [=](core::Renderer::SortUnit a, core::Renderer::SortUnit b) { return a.depth < b.depth; }); }
-            renderHSVs(aInfo, aAccessor, aAccessor.get(mTimeLine).hsv().hsv());
         }
+        if (!mRenders.empty()) {
+            // Depth sorting
+            std::stable_sort(
+                mRenders.begin(), mRenders.end(),
+                [=](core::Renderer::SortUnit a, core::Renderer::SortUnit b) { return a.depth < b.depth; }
+            );
+        }
+        
+        
+        auto hsvData = aAccessor.get(mTimeLine).hsv().hsv();
+        for (auto child : mRenders) {
+            child.renderer->renderHSV(aInfo, aAccessor, hsvData);
+        }
+        mRenders.clear();
     }
-
 }
 
 void FolderNode::renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor) {
@@ -174,13 +142,6 @@ void FolderNode::renderHSV(const RenderInfo& aInfo, const TimeCacheAccessor& aAc
             child->renderer()->renderHSV(aInfo, aAccessor, HSVData);
         }
     }
-}
-
-void FolderNode::renderHSVs(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, QList<int> aHSV) {
-    for (auto child : mRenders) {
-        child.renderer->renderHSV(aInfo, aAccessor, aHSV);
-    }
-    mRenders.clear();
 }
 
 float FolderNode::initialDepth() const {
@@ -235,9 +196,8 @@ bool FolderNode::deserialize(Deserializer& aIn) {
     aIn.read(mIsClipped);
 
     // timeline
-    if (!mTimeLine.deserialize(aIn)) {
-        return false;
-    }
+    if (!mTimeLine.deserialize(aIn))
+        return aIn.errored("failed to deserialize time line");
 
     // check block end
     if (!aIn.endBlock())
