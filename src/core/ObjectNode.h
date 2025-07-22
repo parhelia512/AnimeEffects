@@ -3,8 +3,6 @@
 
 #include <QRect>
 #include <QRectF>
-#include <list>
-#include "XC.h"
 #include "util/TreeNodeBase.h"
 #include "util/LifeLink.h"
 #include "util/TreeIterator.h"
@@ -13,7 +11,6 @@
 #include "core/ObjectType.h"
 #include "core/Renderer.h"
 #include "core/TimeLine.h"
-#include "core/GridMesh.h"
 #include "core/Serializer.h"
 #include "core/Deserializer.h"
 namespace core {

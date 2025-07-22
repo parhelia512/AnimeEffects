@@ -3,7 +3,6 @@
 
 #include <QVector3D>
 #include <QList>
-#include "XC.h"
 #include "img/BlendMode.h"
 #include "core/RenderInfo.h"
 #include "core/TimeCacheAccessor.h"

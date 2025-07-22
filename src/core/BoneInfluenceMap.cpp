@@ -1,7 +1,5 @@
 #include <float.h>
 #include <QtMath>
-#include "XC.h"
-#include "core/Constant.h"
 #include "core/Project.h"
 #include "core/LayerMesh.h"
 #include "core/BoneInfluenceMap.h"
@@ -166,7 +164,7 @@ void BoneInfluenceMap::build() {
 
 void BoneInfluenceMap::transformVertices() {
     for (int i = 0; i < mVertexCount; ++i) {
-        mWorks[i].vertex = (mGroupMtx * QVector3D(mWorks[i].vertex)).toVector2D();
+        mWorks[i].vertex = (mGroupMtx.map(QVector3D(mWorks[i].vertex))).toVector2D();
     }
 }
 

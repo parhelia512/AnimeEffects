@@ -27,7 +27,7 @@ namespace bone {
         KeyOwner& mKeyOwner;
         QMatrix4x4 mTargetMtx;
         QMatrix4x4 mTargetInvMtx;
-        QScopedPointer<core::Bone2> mDangledTop;
+        std::unique_ptr<core::Bone2> mDangledTop;
         Focuser mFocuser;
     };
 

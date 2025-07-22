@@ -6,10 +6,8 @@
 #include <QVector2D>
 #include <QRectF>
 #include <QMatrix4x4>
-#include "util/Segment2D.h"
 #include "util/NonCopyable.h"
 #include "thr/Task.h"
-#include "gl/Vector3.h"
 #include "gl/Vector4.h"
 #include "gl/Vector4I.h"
 #include "core/Bone2.h"

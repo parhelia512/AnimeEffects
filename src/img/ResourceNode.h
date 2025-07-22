@@ -1,15 +1,11 @@
 #ifndef IMG_RESOURCENODE_H
 #define IMG_RESOURCENODE_H
 
-#include <utility>
 #include <QRect>
 #include "util/TreeNodeBase.h"
 #include "util/TreeIterator.h"
 #include "util/NonCopyable.h"
-#include "img/Format.h"
-#include "img/Buffer.h"
 #include "img/ResourceHandle.h"
-#include "img/BlendMode.h"
 
 namespace img {
 

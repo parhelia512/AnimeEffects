@@ -1,9 +1,5 @@
-#include "util/MathUtil.h"
-#include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
-#include "core/Constant.h"
 #include "core/TimeLine.h"
-#include "ctrl/TimeLineUtil.h"
 #include "ctrl/CmndName.h"
 #include "ctrl/mesh/mesh_DeleteMode.h"
 #include "ctrl/mesh/mesh_Renderer.h"
@@ -57,7 +53,7 @@ namespace mesh {
     }
 
     QVector2D DeleteMode::getModelPos(const core::AbstractCursor& aCursor) {
-        return (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
+        return (mTargetInvMtx.map(QVector3D(aCursor.worldPos()))).toVector2D();
     }
 
     void DeleteMode::removeVtx(MeshVtx& aVtx) {
