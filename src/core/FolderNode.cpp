@@ -37,12 +37,7 @@ void FolderNode::setDefaultOpacity(float aValue) {
 
 void FolderNode::grabHeightMap(HeightMap* aNode) { mHeightMap.reset(aNode); }
 
-bool FolderNode::isClipper() const {
-    if (mIsClipped) return false;
-
-    auto prev = this->prevSib();
-    return prev && prev->renderer() && prev->renderer()->isClipped();
-}
+bool FolderNode::isClipper() const { return ObjectNodeUtil::isClipper(this); }
 
 void FolderNode::prerender(const RenderInfo&, const TimeCacheAccessor&) {}
 
@@ -96,35 +91,9 @@ void FolderNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAcces
     }
 }
 
-void FolderNode::renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor) {
-    if (!aInfo.clippingFrame || !isClipper())
-        return;
-
-    // reset clippees
-    ObjectNodeUtil::collectRenderClippees(*this, mClippees, aAccessor);
-
-    // clipping frame
-    auto& frame = *aInfo.clippingFrame;
-
-    const uint8 clippingId = frame.forwardClippingId();
-
-    RenderInfo childInfo = aInfo;
-    childInfo.clippingId = clippingId;
-
-    uint32 stamp = frame.renderStamp() + 1;
-
-    for (auto clippee : mClippees) {
-        XC_PTR_ASSERT(clippee.renderer);
-
-        // write clipper as necessary
-        if (stamp != frame.renderStamp()) {
-            renderClipper(aInfo, aAccessor, clippingId);
-            stamp = frame.renderStamp();
-        }
-
-        // render child
-        clippee.renderer->render(childInfo, aAccessor);
-    }
+void FolderNode::renderClippees(const RenderInfo& i, const TimeCacheAccessor& a) {
+    ObjectNodeUtil::renderClippees(*this, mClippees, i, a,
+        [this](const auto& inf, const auto& acc, uint8 id){ renderClipper(inf, acc, id); });
 }
 
 void FolderNode::renderClipper(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, uint8 aClipperId) {
@@ -152,58 +121,14 @@ float FolderNode::initialDepth() const {
 void FolderNode::setClipped(bool aIsClipped) { mIsClipped = aIsClipped; }
 
 bool FolderNode::serialize(Serializer& aOut) const {
-    static const std::array<uint8, 8> kSignature = {'F', 'o', 'l', 'd', 'e', 'r', 'N', 'd'};
-
-    // block begin
-    auto pos = aOut.beginBlock(kSignature);
-
-    // name
-    aOut.write(mName);
-    // visibility
-    aOut.write(mIsVisible);
-    // slim-down
-    aOut.write(mIsSlimmedDown);
-    // initial rect
-    aOut.write(mInitialRect);
-    // clipping
-    aOut.write(mIsClipped);
-
-    // timeline
-    if (!mTimeLine.serialize(aOut)) {
-        return false;
-    }
-
-    // block end
-    aOut.endBlock(pos);
-
-    return !aOut.failure();
+    static const std::array<uint8, 8> sig = {'F', 'o', 'l', 'd', 'e', 'r', 'N', 'd'};
+    return ObjectNodeUtil::writeObjectBlock(aOut, sig, mName, mIsVisible, mIsSlimmedDown,
+                                  mInitialRect, mIsClipped, mTimeLine);
 }
 
 bool FolderNode::deserialize(Deserializer& aIn) {
-    // check block begin
-    if (!aIn.beginBlock("FolderNd"))
-        return aIn.errored("invalid signature of folder node");
-
-    // name
-    aIn.read(mName);
-    // visibility
-    aIn.read(mIsVisible);
-    // slim-down
-    aIn.read(mIsSlimmedDown);
-    // initial rect
-    aIn.read(mInitialRect);
-    // clipping
-    aIn.read(mIsClipped);
-
-    // timeline
-    if (!mTimeLine.deserialize(aIn))
-        return aIn.errored("failed to deserialize time line");
-
-    // check block end
-    if (!aIn.endBlock())
-        return aIn.errored("invalid end of folder node");
-
-    return !aIn.failure();
+    return ObjectNodeUtil::readObjectBlock(aIn, "FolderNd", mName, mIsVisible, mIsSlimmedDown,
+                            mInitialRect, mIsClipped, mTimeLine);
 }
 
 } // namespace core

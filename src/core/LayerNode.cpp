@@ -77,12 +77,7 @@ float LayerNode::initialDepth() const {
 
 void LayerNode::setClipped(bool aIsClipped) { mIsClipped = aIsClipped; }
 
-bool LayerNode::isClipper() const {
-    if (mIsClipped) return false;
-
-    auto prev = this->prevSib();
-    return prev && prev->renderer() && prev->renderer()->isClipped();
-}
+bool LayerNode::isClipper()  const { return ObjectNodeUtil::isClipper(this); }
 
 img::BlendMode LayerNode::blendMode() const {
     auto key = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
@@ -120,35 +115,10 @@ void LayerNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAccess
     renderClippees(aInfo, aAccessor);
 }
 
-void LayerNode::renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor) {
-    if (!aInfo.clippingFrame || !isClipper())
-        return;
-
-    // reset clippees
-    ObjectNodeUtil::collectRenderClippees(*this, mClippees, aAccessor);
-
-    // clipping frame
-    auto& frame = *aInfo.clippingFrame;
-
-    const uint8 clippingId = frame.forwardClippingId();
-
-    RenderInfo childInfo = aInfo;
-    childInfo.clippingId = clippingId;
-
-    uint32 stamp = frame.renderStamp() + 1;
-
-    for (auto clippee : mClippees) {
-        XC_PTR_ASSERT(clippee.renderer);
-
-        // write clipper as necessary
-        if (stamp != frame.renderStamp()) {
-            renderClipper(aInfo, aAccessor, clippingId);
-            stamp = frame.renderStamp();
-        }
-
-        // render child
-        clippee.renderer->render(childInfo, aAccessor);
-    }
+void LayerNode::renderClippees(const RenderInfo& i, const TimeCacheAccessor& a)
+{
+    ObjectNodeUtil::renderClippees(*this, mClippees, i, a,
+        [this](const auto& inf, const auto& acc, uint8 id){ renderClipper(inf, acc, id); });
 }
 
 void LayerNode::renderClipper(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, uint8 aClipperId) {
@@ -384,76 +354,34 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent) {
     return result;
 }
 
+void LayerNode::reserveShadersFromTimeline() {
+    mShaderHolder.reserveGridShader();
+    mShaderHolder.reserveClipperShaders();
+
+    auto reserveOne = [this](ImageKey* k) {
+        mShaderHolder.reserveShaders(k->data().blendMode());
+        mShaderHolder.reserveHSVShaders();
+    };
+
+    if (auto def = static_cast<ImageKey*>(mTimeLine.defaultKey(TimeKeyType_Image)))
+        reserveOne(def);
+
+    for (auto key : mTimeLine.map(TimeKeyType_Image))
+        reserveOne(static_cast<ImageKey*>(key));
+}
+
 bool LayerNode::serialize(Serializer& aOut) const {
-    static const std::array<uint8, 8> kSignature = {'L', 'a', 'y', 'e', 'r', 'N', 'd', '_'};
-
-    // block begin
-    auto pos = aOut.beginBlock(kSignature);
-
-    // name
-    aOut.write(mName);
-    // visibility
-    aOut.write(mIsVisible);
-    // slim-down
-    aOut.write(mIsSlimmedDown);
-    // initial rect
-    aOut.write(mInitialRect);
-    // clipping
-    aOut.write(mIsClipped);
-    // timeline
-    if (!mTimeLine.serialize(aOut)) {
-        return false;
-    }
-
-    // block end
-    aOut.endBlock(pos);
-
-    return !aOut.failure();
+    static const std::array<uint8, 8> sig = {'L', 'a', 'y', 'e', 'r', 'N', 'd', '_'};
+    return ObjectNodeUtil::writeObjectBlock(aOut, sig, mName, mIsVisible, mIsSlimmedDown,
+                                  mInitialRect, mIsClipped, mTimeLine);
 }
 
 bool LayerNode::deserialize(Deserializer& aIn) {
-    // check block begin
-    if (!aIn.beginBlock("LayerNd_"))
-        return aIn.errored("invalid signature of layer node");
-
-    // name
-    aIn.read(mName);
-    // visibility
-    aIn.read(mIsVisible);
-    // slim-down
-    aIn.read(mIsSlimmedDown);
-    // initial rect
-    aIn.read(mInitialRect);
-    // clipping
-    aIn.read(mIsClipped);
-
-    // timeline
-    if (!mTimeLine.deserialize(aIn))
-        return aIn.errored("failed to deserialize time line");
-
-    // reserve shaders
-    {
-        mShaderHolder.reserveGridShader();
-        mShaderHolder.reserveClipperShaders();
-
-        auto defaultKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
-        if (defaultKey) {
-            mShaderHolder.reserveShaders(defaultKey->data().blendMode());
-            mShaderHolder.reserveHSVShaders();
-        }
-
-        auto& map = mTimeLine.map(TimeKeyType_Image);
-        for (auto key : map) {
-            mShaderHolder.reserveShaders(((ImageKey*)key)->data().blendMode());
-            mShaderHolder.reserveHSVShaders();
-        }
-    }
-
-    // check block end
-    if (!aIn.endBlock())
-        return aIn.errored("invalid end of layer node");
-
-    return aIn.checkStream();
+    auto res = ObjectNodeUtil::readObjectBlock(aIn, "LayerNd_", mName, mIsVisible, mIsSlimmedDown,
+                            mInitialRect, mIsClipped, mTimeLine);
+    if (!res) return res;
+    reserveShadersFromTimeline();
+    return res;
 }
 
 } // namespace core

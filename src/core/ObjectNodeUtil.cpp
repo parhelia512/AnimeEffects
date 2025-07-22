@@ -1,4 +1,5 @@
 #include "core/ObjectNodeUtil.h"
+#include "core/ClippingFrame.h"
 #include "core/TimeKeyExpans.h"
 #include "core/Project.h"
 namespace {
@@ -37,6 +38,88 @@ void fPushRenderClippeeRecursive(
 namespace core {
 
 namespace ObjectNodeUtil {
+
+    bool writeObjectBlock(
+        Serializer& out,
+        const std::array<uint8, 8>& sig,
+        const QString& name,
+        bool visible,
+        bool slim,
+        const QRect& rect,
+        bool clipped,
+        const TimeLine& tl
+    ) {
+        auto pos = out.beginBlock(sig);
+        out.write(name);
+        out.write(visible);
+        out.write(slim);
+        out.write(rect);
+        out.write(clipped);
+        if (!tl.serialize(out)) return false;
+        out.endBlock(pos);
+        return !out.failure();
+    }
+
+    bool readObjectBlock(
+        Deserializer& in,
+        const char* expectedSig,
+        QString& name,
+        bool& visible,
+        bool& slim,
+        QRect& rect,
+        bool& clipped,
+        TimeLine& tl
+    ) {
+        if (!in.beginBlock(expectedSig))
+            return in.errored("invalid signature");
+        in.read(name);
+        in.read(visible);
+        in.read(slim);
+        in.read(rect);
+        in.read(clipped);
+        if (!tl.deserialize(in))
+            return in.errored("failed to deserialize time line");
+        if (!in.endBlock())
+            return in.errored("invalid end of block");
+        return in.checkStream();
+    }
+
+    bool isClipper(const ObjectNode* self) {
+        if (!self || self->renderer() == nullptr) return false;
+        if (self->renderer()->isClipped()) return false;
+
+        auto prev = self->prevSib();
+        return prev && prev->renderer() && prev->renderer()->isClipped();
+    }
+
+    void renderClippees(
+        ObjectNode& self,
+        std::vector<Renderer::SortUnit>& clippees,
+        const RenderInfo& info,
+        const TimeCacheAccessor& acc,
+        std::function<void(const RenderInfo&, const TimeCacheAccessor&, uint8)> clipperFunc
+    ) {
+        if (!info.clippingFrame || !isClipper(&self))
+            return;
+
+        ObjectNodeUtil::collectRenderClippees(self, clippees, acc);
+
+        auto& frame = *info.clippingFrame;
+        const uint8 id = frame.forwardClippingId();
+
+        RenderInfo childInfo = info;
+        childInfo.clippingId = id;
+
+        uint32 stamp = frame.renderStamp() + 1;
+
+        for (auto c : clippees) {
+            if (stamp != frame.renderStamp()) {
+                clipperFunc(info, acc, id);
+                stamp = frame.renderStamp();
+            }
+            c.renderer->render(childInfo, acc);
+        }
+    }
 
     //-------------------------------------------------------------------------------------------------
     float getInitialWorldDepth(ObjectNode& aNode) {

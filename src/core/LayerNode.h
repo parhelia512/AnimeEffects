@@ -55,6 +55,8 @@ public:
 
     virtual cmnd::Vector createResourceUpdater(const ResourceEvent& aEvent);
 
+    void reserveShadersFromTimeline();
+
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 
@@ -74,6 +76,7 @@ public:
     void renderHSV(const RenderInfo& aInfo, const TimeCacheAccessor&, QList<int> HSVData);
     void renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor&);
     bool isClipper() const;
+    
     QString mName;
     bool mIsVisible;
     bool mIsSlimmedDown;
