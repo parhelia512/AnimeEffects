@@ -203,9 +203,9 @@ namespace bone {
         while (itr.hasNext()) {
             auto bone = itr.next();
             auto parent = bone->parent();
-            auto bpos = aInfo.camera.toScreenPos(aTargetMtx * QVector3D(bone->worldPos())).toPointF();
+            auto bpos = aInfo.camera.toScreenPos(aTargetMtx.map(QVector3D(bone->worldPos()))).toPointF();
             if (parent) {
-                auto pbpos = aInfo.camera.toScreenPos(aTargetMtx * QVector3D(parent->worldPos())).toPointF();
+                auto pbpos = aInfo.camera.toScreenPos(aTargetMtx.map(QVector3D(parent->worldPos()))).toPointF();
                 bpos = (bpos + pbpos) / 2.0f;
             }
 

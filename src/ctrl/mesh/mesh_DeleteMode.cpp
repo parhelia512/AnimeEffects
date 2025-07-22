@@ -57,7 +57,7 @@ namespace mesh {
     }
 
     QVector2D DeleteMode::getModelPos(const core::AbstractCursor& aCursor) {
-        return (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
+        return (mTargetInvMtx.map(QVector3D(aCursor.worldPos()))).toVector2D();
     }
 
     void DeleteMode::removeVtx(MeshVtx& aVtx) {

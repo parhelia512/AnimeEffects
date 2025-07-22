@@ -53,15 +53,15 @@ namespace srt {
             if (mFocusing && hasParentInv && hasWorldInv) {
                 mMoving = true;
                 mBaseVec = center - curPos;
-                mBaseCentroid = (worldSRInvMtx * QVector3D(center)).toVector2D();
-                mBasePosition = (parentInvMtx * QVector3D(center)).toVector2D();
+                mBaseCentroid = (worldSRInvMtx.map(QVector3D(center))).toVector2D();
+                mBasePosition = (parentInvMtx.map(QVector3D(center))).toVector2D();
                 mCommandRef = nullptr;
             }
             mod = true;
         } else if (aCursor.emitsLeftDraggedEvent()) {
             if (mMoving && hasParentInv && hasWorldInv) {
-                auto newCentroid = (worldSRInvMtx * QVector3D(curPos + mBaseVec)).toVector2D();
-                auto newPosition = (parentInvMtx * QVector3D(curPos + mBaseVec)).toVector2D();
+                auto newCentroid = (worldSRInvMtx.map(QVector3D(curPos + mBaseVec))).toVector2D();
+                auto newPosition = (parentInvMtx.map(QVector3D(curPos + mBaseVec))).toVector2D();
                 moveCentroid(newCentroid, newPosition);
                 mKeyOwner.updatePosture(mTarget.timeLine()->current());
             }
@@ -135,7 +135,7 @@ namespace srt {
     }
 
     QVector2D CentroidMode::getWorldSymbolPos() const {
-        return (mKeyOwner.parentMtx * mKeyOwner.locSRTMtx * QVector3D()).toVector2D();
+        return ((mKeyOwner.parentMtx * mKeyOwner.locSRTMtx).map(QVector3D())).toVector2D();
     }
 
 } // namespace srt

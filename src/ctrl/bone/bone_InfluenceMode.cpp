@@ -38,7 +38,7 @@ namespace bone {
             mCommandRef = nullptr;
             mFocuser.clearSelection();
             if (focus && focus->parent()) {
-                const QVector2D curPos = (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
+                const QVector2D curPos = (mTargetInvMtx.map(QVector3D(aCursor.worldPos()))).toVector2D();
                 const QVector2D pos = focus->worldPos();
                 const QVector2D dir = pos - focus->parent()->worldPos();
                 const util::Segment2D seg(pos, dir);
@@ -60,7 +60,7 @@ namespace bone {
             Bone2* selected = mFocuser.selectingBone();
             if (selected && selected->parent()) {
                 const QVector2D vel =
-                    (mTargetInvMtx * QVector3D(aCursor.worldVel()) - mTargetInvMtx * QVector3D()).toVector2D();
+                    (mTargetInvMtx.map(QVector3D(aCursor.worldVel())) - mTargetInvMtx.map(QVector3D())).toVector2D();
                 const float appendH = QVector2D::dotProduct(mFocusHAxis, vel);
                 const float appendV = QVector2D::dotProduct(mFocusVAxis, vel);
                 const int index = mFocusChild ? 1 : 0;

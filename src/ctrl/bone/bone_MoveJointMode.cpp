@@ -67,7 +67,7 @@ namespace bone {
     void MoveJointMode::moveBone(core::Bone2& aTarget, const QVector2D& aMove) {
         XC_ASSERT(!mKeyOwner.owns());
         cmnd::Stack& stack = mProject.commandStack();
-        const QVector2D move = (mTargetInvMtx * QVector3D(aMove) - mTargetInvMtx * QVector3D()).toVector2D();
+        const QVector2D move = (mTargetInvMtx.map(QVector3D(aMove)) - mTargetInvMtx.map(QVector3D())).toVector2D();
         const QVector2D nextPos = aTarget.worldPos() + move;
         auto eventType = TimeLineEvent::Type_ChangeKeyValue;
 

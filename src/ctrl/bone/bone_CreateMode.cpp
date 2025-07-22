@@ -44,7 +44,7 @@ namespace bone {
                 mFocuser.clearSelection();
                 mFocuser.select(*focus);
             } else {
-                const QVector2D pos = (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
+                const QVector2D pos = (mTargetInvMtx.map(QVector3D(aCursor.worldPos()))).toVector2D();
 
                 Bone2* selected = mFocuser.selectingBone();
                 mFocuser.clearSelection();

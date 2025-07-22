@@ -78,7 +78,7 @@ namespace mesh {
     }
 
     QVector2D CreateMode::getModelPos(const core::AbstractCursor& aCursor) {
-        return (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
+        return (mTargetInvMtx.map(QVector3D(aCursor.worldPos()))).toVector2D();
     }
 
     MeshFace* CreateMode::pushTriangle(const QVector<QVector2D>& aPos, const QVector<MeshVtx*>& aRef) {

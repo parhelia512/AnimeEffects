@@ -51,9 +51,9 @@ namespace bone {
 
     bool PaintInflMode::updatePaint() {
         bool modified = false;
-        const QVector2D brushPos = (mTargetInvMtx * QVector3D(mBrush.center())).toVector2D();
+        const QVector2D brushPos = (mTargetInvMtx.map(QVector3D(mBrush.center()))).toVector2D();
 
-        const float brushRange = (mTargetInvMtx * QVector3D(mBrush.radius(), 0.0f, 0.0f) - mTargetInvMtx * QVector3D())
+        const float brushRange = (mTargetInvMtx.map(QVector3D(mBrush.radius(), 0.0f, 0.0f)) - mTargetInvMtx.map(QVector3D()))
                                      .toVector2D()
                                      .length();
         const float brushCoreRange = 0.3f * brushRange;
