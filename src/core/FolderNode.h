@@ -2,7 +2,6 @@
 #define CORE_FOLDERNODE_H
 
 #include <QScopedPointer>
-#include "XC.h"
 #include "core/ObjectNode.h"
 #include "core/HeightMap.h"
 #include "core/TimeLine.h"

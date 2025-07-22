@@ -1,12 +1,8 @@
-#include <utility>
 #include <QMatrix4x4>
 #include <QOpenGLFunctions>
 #include <QOpenGLContext>
-#include "XC.h"
 #include "gl/Global.h"
-#include "gl/ExtendShader.h"
 #include "gl/Util.h"
-#include "img/ResourceNode.h"
 #include "img/BlendMode.h"
 #include "core/LayerNode.h"
 #include "core/ObjectNodeUtil.h"

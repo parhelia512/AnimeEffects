@@ -6,8 +6,6 @@
 #include <QMatrix4x4>
 #include "cmnd/Listener.h"
 #include "core/ObjectNode.h"
-#include "core/FolderNode.h"
-#include "core/SRTExpans.h"
 #include "core/TimeCacheAccessor.h"
 
 namespace core {

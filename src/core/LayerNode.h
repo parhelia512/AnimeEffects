@@ -2,15 +2,9 @@
 #define CORE_LAYERNODE_H
 
 #include <QVector>
-#include "XC.h"
-#include "gl/EasyShaderProgram.h"
-#include "gl/Texture.h"
-#include "img/Buffer.h"
 #include "img/ResourceHandle.h"
 #include "core/ObjectNode.h"
 #include "core/Renderer.h"
-#include "core/GridMesh.h"
-#include "core/HeightMap.h"
 #include "core/TimeLine.h"
 #include "core/BoneInfluenceMap.h"
 #include "core/MeshTransformer.h"
