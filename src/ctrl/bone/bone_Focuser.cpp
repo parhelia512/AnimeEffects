@@ -53,7 +53,7 @@ namespace bone {
             Bone2::Iterator itr(topBone);
             while (itr.hasNext()) {
                 auto bone = itr.next();
-                const QVector2D pos = aCamera.toScreenPos(mTargetMtx * QVector3D(bone->worldPos())).toVector2D();
+                const QVector2D pos = aCamera.toScreenPos(mTargetMtx.map(QVector3D(bone->worldPos()))).toVector2D();
                 if ((pos - aPos).lengthSquared() <= kRange) {
                     return bone;
                 }
@@ -75,8 +75,8 @@ namespace bone {
                 if (!parent)
                     continue;
 
-                const QVector2D ppos = (mTargetMtx * QVector3D(parent->worldPos())).toVector2D();
-                const QVector2D cpos = (mTargetMtx * QVector3D(bone->worldPos())).toVector2D();
+                const QVector2D ppos = (mTargetMtx.map(QVector3D(parent->worldPos()))).toVector2D();
+                const QVector2D cpos = (mTargetMtx.map(QVector3D(bone->worldPos()))).toVector2D();
 
                 if ((ppos - cpos).length() < FLT_EPSILON)
                     continue;
@@ -109,8 +109,8 @@ namespace bone {
                 if (!parent)
                     continue;
 
-                const QVector2D ppos = (mTargetMtx * QVector3D(parent->worldPos())).toVector2D();
-                const QVector2D cpos = (mTargetMtx * QVector3D(bone->worldPos())).toVector2D();
+                const QVector2D ppos = (mTargetMtx.map(QVector3D(parent->worldPos()))).toVector2D();
+                const QVector2D cpos = (mTargetMtx.map(QVector3D(bone->worldPos()))).toVector2D();
                 const QVector2D dir(ppos - cpos);
                 const float length = dir.length();
 

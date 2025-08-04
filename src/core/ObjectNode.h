@@ -3,8 +3,6 @@
 
 #include <QRect>
 #include <QRectF>
-#include <list>
-#include "XC.h"
 #include "util/TreeNodeBase.h"
 #include "util/LifeLink.h"
 #include "util/TreeIterator.h"
@@ -13,7 +11,6 @@
 #include "core/ObjectType.h"
 #include "core/Renderer.h"
 #include "core/TimeLine.h"
-#include "core/GridMesh.h"
 #include "core/Serializer.h"
 #include "core/Deserializer.h"
 namespace core {
@@ -24,6 +21,16 @@ class ResourceEvent;
 }
 
 namespace core {
+
+template <typename KeyType, TimeKeyType keyEnum>
+KeyType* getOrCreateDefaultKey(TimeLine& timeLine) {
+    auto key = static_cast<KeyType*>(timeLine.defaultKey(keyEnum));
+    if (!key) {
+        key = new KeyType();
+        timeLine.grabDefaultKey(keyEnum, key);
+    }
+    return key;
+}
 
 class ObjectNode: public util::TreeNodeBase<ObjectNode>, private util::NonCopyable {
 public:

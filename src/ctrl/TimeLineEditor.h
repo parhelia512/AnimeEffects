@@ -12,6 +12,7 @@
 #include "core/AbstractCursor.h"
 #include "core/ObjectNode.h"
 #include "core/CameraInfo.h"
+#include "core/TimeFormat.h"
 #include "core/TimeKeyPos.h"
 #include "ctrl/TimeLineRow.h"
 #include "ctrl/TimeLineUtil.h"
@@ -71,7 +72,8 @@ private:
     time::Current mTimeCurrent;
     time::Scaler mTimeScale;
     time::Focuser mFocus;
-
+    QSettings mSettings;
+    core::TimeFormatType timelineFormat = static_cast<core::TimeFormatType>(mSettings.value("generalsettings/ui/timeformat").toInt());
     TimeLineUtil::MoveFrameOfKey* mMoveRef;
     int mMoveFrame;
     bool mOnUpdatingKey;

@@ -6,13 +6,43 @@
 #include <QMatrix4x4>
 #include "cmnd/Listener.h"
 #include "core/ObjectNode.h"
-#include "core/FolderNode.h"
-#include "core/SRTExpans.h"
 #include "core/TimeCacheAccessor.h"
 
 namespace core {
 
 namespace ObjectNodeUtil {
+    bool writeObjectBlock(
+        Serializer& out,
+        const std::array<uint8, 8>& sig,
+        const QString& name,
+        bool visible,
+        bool slim,
+        const QRect& rect,
+        bool clipped,
+        const TimeLine& tl
+    );
+
+    bool readObjectBlock(
+        Deserializer& in,
+        const char* expectedSig,
+        QString& name,
+        bool& visible,
+        bool& slim,
+        QRect& rect,
+        bool& clipped,
+        TimeLine& tl
+    );
+
+    bool isClipper(const ObjectNode* self);
+
+    void renderClippees(
+        ObjectNode& self,
+        std::vector<Renderer::SortUnit>& clippees,
+        const RenderInfo& info,
+        const TimeCacheAccessor& acc,
+        std::function<void(const RenderInfo&, const TimeCacheAccessor&, uint8)> clipperFunc
+    );
+
     float getInitialWorldDepth(ObjectNode& aNode);
 
     bool thereAreSomeKeysExceedingFrame(const ObjectNode* aRootNode, int aMaxFrame);

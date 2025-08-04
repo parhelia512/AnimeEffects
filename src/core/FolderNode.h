@@ -2,7 +2,6 @@
 #define CORE_FOLDERNODE_H
 
 #include <QScopedPointer>
-#include "XC.h"
 #include "core/ObjectNode.h"
 #include "core/HeightMap.h"
 #include "core/TimeLine.h"
@@ -54,7 +53,6 @@ public:
 
 private:
     void renderClippees(const RenderInfo&, const TimeCacheAccessor&);
-    void renderHSVs(const RenderInfo&, const TimeCacheAccessor&, QList<int> aHSV);
     bool isClipper() const;
 
     QString mName;

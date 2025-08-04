@@ -11,10 +11,11 @@ class BezierCurveEditor : public QWidget
 {
     Q_OBJECT
 public:
-    explicit BezierCurveEditor(QWidget *parent = nullptr, bool isDark = true, util::Easing::CubicBezier* cubicBezier = nullptr, QVector<QDoubleSpinBox*> spins = {});
+    explicit BezierCurveEditor(QWidget *parent = nullptr, bool isDark = true, util::Easing::CubicBezier* cubicBezier = nullptr, QVector<QDoubleSpinBox*> spins = {}, int* pro = nullptr);
     ~BezierCurveEditor();
     util::Easing::CubicBezier* bezier;
     QVector<QDoubleSpinBox*> spinBoxes;
+    int* progress;
 
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *);

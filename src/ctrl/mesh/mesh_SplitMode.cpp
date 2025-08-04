@@ -1,10 +1,6 @@
-#include "util/MathUtil.h"
 #include "util/CollDetect.h"
-#include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
-#include "core/Constant.h"
 #include "core/TimeLine.h"
-#include "ctrl/TimeLineUtil.h"
 #include "ctrl/CmndName.h"
 #include "ctrl/mesh/mesh_SplitMode.h"
 #include "ctrl/mesh/mesh_Renderer.h"
@@ -40,7 +36,7 @@ namespace mesh {
     bool SplitMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor) {
         bool updated = false;
         mFocuser.update(aCamera, aCursor);
-        auto modelCursorPos = (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
+        auto modelCursorPos = (mTargetInvMtx.map(QVector3D(aCursor.worldPos()))).toVector2D();
 
         if (!mBeganSplit) {
             if (aCursor.emitsLeftPressedEvent()) {
@@ -166,12 +162,12 @@ namespace mesh {
     }
 
     QVector2D SplitMode::getScreenPos(const core::CameraInfo& aCamera, const QVector2D& aModelPos) const {
-        return aCamera.toScreenPos(mTargetMtx * QVector3D(aModelPos)).toVector2D();
+        return aCamera.toScreenPos(mTargetMtx.map(QVector3D(aModelPos))).toVector2D();
     }
 
     QVector2D SplitMode::getModelPos(const core::CameraInfo& aCamera, const QVector2D& aScreenPos) const {
         auto worldPos = QVector3D(aCamera.toWorldPos(aScreenPos));
-        return (mTargetInvMtx * worldPos).toVector2D();
+        return (mTargetInvMtx.map(worldPos)).toVector2D();
     }
 
     util::Segment2D SplitMode::getScreenSeg(const core::CameraInfo& aCamera, const util::Segment2D& aSeg) const {

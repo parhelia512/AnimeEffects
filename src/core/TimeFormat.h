@@ -31,7 +31,7 @@ class TimeFormat {
 public:
     TimeFormat(util::Range aRange, int aFps);
 
-    const QString frameToString(const int aFrame, const TimeFormatType aTimeFormatType) const;
+    [[nodiscard]] QString frameToString(const int aFrame, const TimeFormatType aTimeFormatType) const;
 
     static double remap(double value, double min, double max, double nMin, double nMax);
 

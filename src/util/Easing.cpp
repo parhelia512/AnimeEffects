@@ -1,8 +1,5 @@
 #include "Easing.h"
-
-
 #include <QtMath>
-#include "util/Easing.h"
 #include "util/EasingName.h"
 
 namespace util {
@@ -184,13 +181,13 @@ float Easing::calculate(
 // TODO: KILL THIS WITH FIRE
 // Get cubic bezier
 double cubicBezier(const double t, const double p0, const double p1, const double p2, const double p3) {
-    double mt = 1 - t;
+    const double mt = 1 - t;
     return mt * mt * mt * p0 + 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t * p3;
 }
 
 // Get derivative for Newton-Raphson
 double cubicBezierDerivative(const double t, const double p0, const double p1, const double p2, const double p3) {
-    double mt = 1 - t;
+    const double mt = 1 - t;
     return 3 * mt * mt * (p1 - p0) + 6 * mt * t * (p2 - p1) + 3 * t * t * (p3 - p2);
 }
 

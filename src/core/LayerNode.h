@@ -2,15 +2,9 @@
 #define CORE_LAYERNODE_H
 
 #include <QVector>
-#include "XC.h"
-#include "gl/EasyShaderProgram.h"
-#include "gl/Texture.h"
-#include "img/Buffer.h"
 #include "img/ResourceHandle.h"
 #include "core/ObjectNode.h"
 #include "core/Renderer.h"
-#include "core/GridMesh.h"
-#include "core/HeightMap.h"
 #include "core/TimeLine.h"
 #include "core/BoneInfluenceMap.h"
 #include "core/MeshTransformer.h"
@@ -33,8 +27,6 @@ public:
     void setDefaultDepth(float aValue);
     // default opacity
     void setDefaultOpacity(float aValue);
-    // default hsv
-    void setDefaultHSV(QList<int> aValue);
 
     // from ObjectNode
     virtual ObjectType type() const { return ObjectType_Layer; }
@@ -57,6 +49,8 @@ public:
 
     virtual cmnd::Vector createResourceUpdater(const ResourceEvent& aEvent);
 
+    void reserveShadersFromTimeline();
+
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 
@@ -66,16 +60,17 @@ public:
     virtual void renderClipper(const RenderInfo&, const TimeCacheAccessor&, uint8 aClipperId);
     virtual void setClipped(bool aIsClipped);
     virtual bool isClipped() const { return mIsClipped; }
-    virtual void renderHSV(const RenderInfo& aInfo, const TimeCacheAccessor&, QList<int> HSVData);
     virtual bool hasBlendMode() const { return true; }
     virtual img::BlendMode blendMode() const;
     virtual void setBlendMode(img::BlendMode);
-
-private:
+    
+    private:
     void transformShape(const RenderInfo& aInfo, const TimeCacheAccessor&);
-    void renderShape(const RenderInfo& aInfo, const TimeCacheAccessor&);
+    void renderLayer(const RenderInfo& aInfo, const TimeCacheAccessor&, bool useHSV, QList<int> HSVData);
+    void renderHSV(const RenderInfo& aInfo, const TimeCacheAccessor&, QList<int> HSVData);
     void renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor&);
     bool isClipper() const;
+    
     QString mName;
     bool mIsVisible;
     bool mIsSlimmedDown;

@@ -16,13 +16,14 @@ float invert (const int min, const int max, const float value) {
     return static_cast<float>(max) - value + static_cast<float>(min);
 }
 
-BezierCurveEditor::BezierCurveEditor(QWidget *parent, const bool isDark, util::Easing::CubicBezier* cubicBezier, QVector<QDoubleSpinBox*> spins)
+BezierCurveEditor::BezierCurveEditor(QWidget *parent, const bool isDark, util::Easing::CubicBezier* cubicBezier, QVector<QDoubleSpinBox*> spins, int* pro)
     : QWidget(parent)
     , m_curvePen(isDark? Qt::white: Qt::black)
     , m_dragging(false)
 {
     m_curvePen.setWidth(2);
     bezier = cubicBezier;
+    progress = pro;
 
     spinBoxes = std::move(spins);
     if (isDark) {
@@ -65,6 +66,7 @@ void BezierCurveEditor::mouseMoveEvent(QMouseEvent *event)
     if(m_dragging) {
         m_points[m_selectedPoint] = event->pos();
     }
+    *progress = 0;
     update();
 }
 

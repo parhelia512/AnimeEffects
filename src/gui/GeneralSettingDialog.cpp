@@ -290,7 +290,7 @@ GeneralSettingDialog::GeneralSettingDialog(GUIResources& aGUIResources, QWidget*
             mLanguageBox->addItem(indexToLanguage(i));
         }
         mLanguageBox->setCurrentIndex(mInitialLanguageIndex);
-        form->addRow(tr("Language (needs restarting) :"), mLanguageBox);
+        form->addRow(tr("Language (needs restart) :"), mLanguageBox);
 
         mEasingBox = new QComboBox();
         for (int i = 0; i < kEasingTypeCount; ++i) {
@@ -311,7 +311,7 @@ GeneralSettingDialog::GeneralSettingDialog(GUIResources& aGUIResources, QWidget*
             mTimeFormatBox->addItem(indexToTimeFormat(i));
         }
         mTimeFormatBox->setCurrentIndex(mInitialTimeFormatIndex);
-        form->addRow(tr("Timeline format :"), mTimeFormatBox);
+        form->addRow(tr("Timeline format (needs restart) :"), mTimeFormatBox);
 
 
         mThemeBox = new QComboBox();

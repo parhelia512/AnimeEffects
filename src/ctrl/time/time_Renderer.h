@@ -17,7 +17,8 @@ namespace time {
 
     class Renderer {
     public:
-        Renderer(QPainter& aPainter, const core::CameraInfo& aCamera, const theme::TimeLine& aTheme);
+        Renderer(QPainter& aPainter, const core::CameraInfo& aCamera, const theme::TimeLine& aTheme,
+            const core::TimeFormatType& timeFormat);
 
         void setMargin(int aMargin) { mMargin = aMargin; }
         void setRange(const util::Range& aRange) { mRange = aRange; }
@@ -39,6 +40,7 @@ namespace time {
         int mMargin;
         util::Range mRange;
         const Scaler* mScale;
+        const core::TimeFormatType timeFormatVar;
     };
 
 } // namespace time
