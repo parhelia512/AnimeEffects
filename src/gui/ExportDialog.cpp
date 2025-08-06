@@ -62,9 +62,10 @@ void ExportDialog::pushSizeBox(QFormLayout& aLayout) {
         x->setRange(1, 32767);
         y->setRange(1, 32767);
         QSettings settings;
-        bool ignore_warning = settings.value("export_ignore_warnings").isValid()? settings.value("export_ignore_warnings").toBool() : false;
-        if (!ignore_warning) {
-            if (!(mCommonParam.size.width() % 2 == 0) || !(mCommonParam.size.height() % 2 == 0)) {
+        auto ignoreWarnings = settings.value("export_ignore_warnings");
+        bool bIgnoreWarnings = ignoreWarnings.isValid()? ignoreWarnings.toBool(): false;
+        if (bIgnoreWarnings == false) {
+            if (mCommonParam.size.width() % 2 != 0 || mCommonParam.size.height() % 2 != 0) {
                 MainWindow::showInfoPopup(
                     tr("Value is Odd"),
                     tr("The width or height of the image ends with an odd number. "
