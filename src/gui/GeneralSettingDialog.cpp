@@ -256,7 +256,7 @@ GeneralSettingDialog::GeneralSettingDialog(GUIResources& aGUIResources, QWidget*
         bForceSolverLoad = forceSolverLoad.toBool();
 
         auto ignoreWarnings = settings.value("export_ignore_warnings");
-        bIgnoreWarnings = ignoreWarnings.isValid()? false : ignoreWarnings.toBool();
+        bIgnoreWarnings = ignoreWarnings.isValid()? ignoreWarnings.toBool(): false;
 
         auto isAutoSave = settings.value("generalsettings/projects/enableAutosave");
         bAutoSave = isAutoSave.isValid()? isAutoSave.toBool() : true;
