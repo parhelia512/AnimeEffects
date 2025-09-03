@@ -31,7 +31,7 @@ jobs:
       - name: Get dependencies
         shell: bash
         run: |
-          brew install cmake ninja vulkan-headers
+          brew install ninja vulkan-headers
       - name: Build AnimeEffects
         shell: bash
         run: |
