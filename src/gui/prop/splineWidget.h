@@ -112,9 +112,9 @@ public:
                     static_cast<float>(spins[3]->value())
                 };
                 m_editor->bezier = cubicBezier;
-                int width = m_editor->width();
-                int height = m_editor->height();
-                QPointF points1 = {
+                const int width = m_editor->width();
+                const int height = m_editor->height();
+                const QPointF points1 = {
                     denormalize(cubicBezier->x1, 20, width - 20), 
                     denormalize(invert(0, 1, cubicBezier->y1), 20, height -20)};
                 QPointF points2 = {
@@ -156,8 +156,7 @@ public:
 
         QToolButton::connect(toolButton_2, &QToolButton::clicked, [=]() {
             QClipboard *clip = QGuiApplication::clipboard();
-            QStringList list = clip->text().split(",");
-            if (!list.isEmpty() && list.size() == 4) {
+            if (QStringList list = clip->text().split(","); !list.isEmpty() && list.size() == 4) {
                 bezier->x1 = list[0].toFloat();
                 bezier->y1 = list[1].toFloat();
                 bezier->x2 = list[2].toFloat();

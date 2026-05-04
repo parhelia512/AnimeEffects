@@ -16,11 +16,9 @@ float invert (const int min, const int max, const float value) {
     return static_cast<float>(max) - value + static_cast<float>(min);
 }
 
-BezierCurveEditor::BezierCurveEditor(QWidget *parent, const bool isDark, util::Easing::CubicBezier* cubicBezier, QVector<QDoubleSpinBox*> spins, int* pro)
-    : QWidget(parent)
-    , m_curvePen(isDark? Qt::white: Qt::black)
-    , m_dragging(false)
-{
+BezierCurveEditor::BezierCurveEditor(QWidget *parent, const bool isDark, util::Easing::CubicBezier* cubicBezier, QVector<QDoubleSpinBox*> spins, int* pro
+):
+    QWidget(parent), m_curvePen(isDark ? Qt::white : Qt::black), m_dragging(false), m_selectedPoint(0) {
     m_curvePen.setWidth(2);
     bezier = cubicBezier;
     progress = pro;
@@ -29,8 +27,7 @@ BezierCurveEditor::BezierCurveEditor(QWidget *parent, const bool isDark, util::E
     if (isDark) {
         m_colors[0] = Qt::white;
         m_colors[3] = Qt::white;
-    }
-    else {
+    } else {
         m_colors[0] = Qt::black;
         m_colors[3] = Qt::black;
     }
@@ -38,15 +35,12 @@ BezierCurveEditor::BezierCurveEditor(QWidget *parent, const bool isDark, util::E
     m_colors[2] = QColor(82, 87, 208);
 
     for (int i = 0; i < NUM_POINTS; i++) {
-        m_pens[i]    = QPen(m_colors[i]);
+        m_pens[i] = QPen(m_colors[i]);
         m_brushes[i] = QBrush(m_colors[i]);
     }
 }
 
-BezierCurveEditor::~BezierCurveEditor()
-{
-
-}
+BezierCurveEditor::~BezierCurveEditor() = default;
 
 void BezierCurveEditor::mousePressEvent(QMouseEvent *event)
 {
@@ -107,14 +101,14 @@ void BezierCurveEditor::paintEvent(QPaintEvent *)
     bezier->y2 = normalize(inverted_y2, 20, height() -20);
 
     if (!spinBoxes.empty() && spinBoxes.at(0)) {
-        for (auto box : spinBoxes) {
+        for (const auto box : spinBoxes) {
             box->blockSignals(true);
         }
         spinBoxes.at(0)->setValue(bezier->x1);
         spinBoxes.at(1)->setValue(bezier->y1);
         spinBoxes.at(2)->setValue(bezier->x2);
         spinBoxes.at(3)->setValue(bezier->y2);
-        for (auto box : spinBoxes) {
+        for (const auto box : spinBoxes) {
             box->blockSignals(false);
         }
     }
