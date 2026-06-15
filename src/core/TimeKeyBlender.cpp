@@ -1,4 +1,4 @@
-#include "util/TreeIterator.h"
+    #include "util/TreeIterator.h"
 #include "util/TreeSeekIterator.h"
 #include "util/MathUtil.h"
 #include "core/TimeKeyExpans.h"

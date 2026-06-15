@@ -1,4 +1,5 @@
 #include "ctrl/Painter.h"
+#include <QImage>
 
 namespace ctrl {
 

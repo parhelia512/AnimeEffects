@@ -1,7 +1,5 @@
 #include <QFile>
-#include <QMessageBox>
 #include <QDomDocument>
-#include <QClipboard>
 #include <qstandardpaths.h>
 #include "qprocess.h"
 #include "util/TextUtil.h"
@@ -17,8 +15,9 @@
 #include "gui/GeneralSettingDialog.h"
 #include "gui/MouseSettingDialog.h"
 #include "util/NetworkUtil.h"
-
-
+#ifdef Q_OS_WINDOWS
+#include <Windows.h>
+#endif
 #define VENDOR_ID_LEN 13
 
 namespace gui {
@@ -354,8 +353,8 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResour
     }
 
     auto helpMenu = new QMenu(tr("Help"), this);
-    {
-        auto aboutMe = new QAction(tr("About AnimeEffects"), this);
+        {
+            auto aboutMe = new QAction(tr("About AnimeEffects"), this);
         connect(aboutMe, &QAction::triggered, [=]() {
             QMessageBox msgBox;
             msgBox.setWindowIcon(QIcon("../src/AnimeEffects.ico"));
@@ -383,8 +382,14 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResour
                 "[Henrich](https://github.com/henrich), "
                 "[mcddx330](https://github.com/mcddx330), "
                 "[Freddii](https://github.com/freddii), "
-                "[aki017](https://github.com/aki017), "
-                "[picoHz](https://github.com/picoHz)."
+                "[Aki017](https://github.com/aki017), "
+                "[PicoHz](https://github.com/picoHz), "
+                "[Peter9811](https://github.com/peter9811), "
+                "[GES233](https://github.com/GES233), "
+                "[h-banii](https://github.com/h-banii), "
+                "[henrich](https://github.com/henrich), "
+                "[Nanashia](https://github.com/Nanashia).\n"
+                "If we forgot to include you please let us know or open a PR!"
                 ));
             msgBox.setTextFormat(Qt::TextFormat::MarkdownText);
             msgBox.setText(msgStr);
@@ -410,16 +415,17 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResour
             ZeroMemory(&memory_status, sizeof(MEMORYSTATUSEX));
             memory_status.dwLength = sizeof(MEMORYSTATUSEX);
             if (GlobalMemoryStatusEx(&memory_status)) {
-                system_info = QString("RAM: %1MB").arg(memory_status.ullTotalPhys / (1024 * 1024));
-            } else {
-                system_info = "Unable to fetch RAM amount";
+              system_info = QString(" RAM: %1 MB").arg(memory_status.ullTotalPhys / (1024 * 1024));
+            }
+            else {
+                system_info = " RAM: Unknown";
             }
 
             #elif defined(Q_OS_MACOS)
             QProcess p;
             p.start("system_profiler", QStringList() << "SPHardwareDataType" << "| grep" << " Memory:");
             p.waitForFinished();
-            QString system_info = p.readAllStandardOutput();
+            system_info = p.readAllStandardOutput();
             p.close();
 
             #elif defined(Q_OS_LINUX)
@@ -472,7 +478,6 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResour
             // ---------------------- //
             detail += tr("CPU vendor: ") + vendor + "\n";
             detail += tr("CPU architecture: ") + QSysInfo::currentCpuArchitecture() + "\n";
-            detail += tr("CPU cores: ") + QString::number(QThread::idealThreadCount() / 2) + "\n";
             detail += tr("CPU threads: ") + QString::number(QThread::idealThreadCount()) + "\n";
             #ifdef Q_OS_APPLE
             QRegularExpression regexp = QRegularExpression("(?<=Memory:)(.*?)(?=\r?\n)");
@@ -680,7 +685,7 @@ ProjectCanvasSizeSettingDialog::ProjectCanvasSizeSettingDialog(
     auto curSize = mProject.attribute().imageSize();
     {
         auto devInfo = mViaPoint.glDeviceInfo();
-        const int maxBufferSize = std::min(devInfo.maxTextureSize, devInfo.maxRenderBufferSize);
+        const int maxBufferSize = min(devInfo.maxTextureSize, devInfo.maxRenderBufferSize);
         XC_ASSERT(maxBufferSize > 0);
 
         auto form = new QFormLayout();
@@ -768,7 +773,7 @@ ProjectMaxFrameSettingDialog::ProjectMaxFrameSettingDialog(core::Project& aProje
         auto layout = new QHBoxLayout();
         {
             mMaxFrameBox = new QSpinBox();
-            mMaxFrameBox->setRange(1, std::numeric_limits<int>::max());
+            mMaxFrameBox->setRange(1, 0x7FFFFFFF);
             mMaxFrameBox->setValue(curMaxFrame);
             layout->addWidget(mMaxFrameBox);
         }
@@ -938,7 +943,8 @@ ProjectFPSSettingDialog::ProjectFPSSettingDialog(core::Project& aProject, QWidge
         auto layout = new QHBoxLayout();
         {
             mFPSBox = new QSpinBox();
-            mFPSBox->setRange(1, std::numeric_limits<int>::max());
+            const int max = 0x7fffffff;
+            mFPSBox->setRange(1, max);
             mFPSBox->setValue(curFPS);
             layout->addWidget(mFPSBox);
         }

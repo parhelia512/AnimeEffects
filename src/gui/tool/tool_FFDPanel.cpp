@@ -62,7 +62,7 @@ namespace tool {
         // radius
         mRadius.reset(new SliderItem(tr("Radius"), this->palette(), this));
         mRadius->setAttribute(util::Range(5, 1000), mParam.radius, 50);
-        mRadius->connectOnChanged([=](int aValue) {
+        mRadius->connectOnAny([=](int aValue) {
             this->mParam.radius = aValue;
             this->onParamUpdated(false);
         });
@@ -70,7 +70,7 @@ namespace tool {
         // pressure
         mPressure.reset(new SliderItem(tr("Pressure"), this->palette(), this));
         mPressure->setAttribute(util::Range(0, kScale), mParam.pressure * kScale, kScale / 10);
-        mPressure->connectOnMoved([=](int aValue) {
+        mPressure->connectOnAny([=](int aValue) {
             this->mParam.pressure = (float)aValue / kScale;
             this->onParamUpdated(false);
         });
@@ -78,7 +78,7 @@ namespace tool {
         // blur
         mBlur.reset(new SliderItem(tr("Blur"), this->palette(), this));
         mBlur->setAttribute(util::Range(0, kScale), mParam.blur * kScale, kScale / 10);
-        mBlur->connectOnMoved([=](int aValue) {
+        mBlur->connectOnAny([=](int aValue) {
             this->mParam.blur = (float)aValue / kScale;
             this->onParamUpdated(false);
         });
@@ -99,7 +99,7 @@ namespace tool {
         // erase radius
         mEraseRadius.reset(new SliderItem(tr("Radius"), this->palette(), this));
         mEraseRadius->setAttribute(util::Range(5, 1000), mParam.eraseRadius, 50);
-        mEraseRadius->connectOnChanged([=](int aValue) {
+        mEraseRadius->connectOnAny([=](int aValue) {
             this->mParam.eraseRadius = aValue;
             this->onParamUpdated(false);
         });
@@ -107,7 +107,7 @@ namespace tool {
         // erase pressure
         mErasePressure.reset(new SliderItem(tr("Pressure"), this->palette(), this));
         mErasePressure->setAttribute(util::Range(0, kScale), mParam.erasePressure * kScale, kScale / 10);
-        mErasePressure->connectOnMoved([=](int aValue) {
+        mErasePressure->connectOnAny([=](int aValue) {
             this->mParam.erasePressure = (float)aValue / kScale;
             this->onParamUpdated(false);
         });

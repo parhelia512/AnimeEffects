@@ -99,7 +99,7 @@ System::openProject(const QString& aFileName, Project::Hook* aHookGrabbed, util:
         if (loader.load(aFileName, *projectScope, gl::DeviceInfo::instance(), aReporter)) {
             mProjects.push_back(projectScope.release());
             {
-                // Due to the transition to Qt6 every cache on load is just f*cked, TODO: Fix cache loading
+                // Apparently this fixed itself in newer qt6 versions? TODO: Check if no longer necessary and if not, remove
                 const auto aOwner = mProjects.back()->objectTree().topNode();
                 for (ObjectNode::Iterator itr(aOwner); itr.hasNext();) {
                     ObjectNode* node = itr.next();
