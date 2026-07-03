@@ -194,7 +194,7 @@ double cubicBezierDerivative(const double t, const double p0, const double p1, c
 // Solve x(t) = x using Newton-Raphson to get t
 double solveTForX(const double x, const double x1, const double x2, const double epsilon = 1e-6) {
     double t = x; // Initial guess
-    constexpr int iter = 25; // Max iterations
+    constexpr int iter = 6; // Max iterations
     for (int i = 0; i < iter; ++i) {
         const double xt = cubicBezier(t, 0.0, x1, x2, 1.0);
         const double dx = cubicBezierDerivative(t, 0.0, x1, x2, 1.0);

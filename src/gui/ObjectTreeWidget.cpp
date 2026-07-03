@@ -1,5 +1,6 @@
 #include <QMenu>
 #include <QPainter>
+#include <memory>
 #include <QScrollBar>
 #include <QDragMoveEvent>
 #include <QModelIndexList>
@@ -109,6 +110,9 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
         mObjectMirror = new QAction(tr("Duplicate node"), this);
         mObjectMirror->connect(mObjectMirror, &QAction::triggered, this, &ObjectTreeWidget::onObjectMirrorTriggered);
 
+        mAddDefaults = new QAction(tr("Add default keys"), this);
+        mAddDefaults->connect(mAddDefaults, &QAction::triggered, this, &ObjectTreeWidget::onAddDefaultsTriggered);
+
         mFolderAction = new QAction(tr("Create folder"), this);
         mFolderAction->connect(mFolderAction, &QAction::triggered, this, &ObjectTreeWidget::onFolderActionTriggered);
 
@@ -128,13 +132,13 @@ void ObjectTreeWidget::setProject(core::Project* aProject) {
 
         auto treeCount = this->topLevelItemCount();
         if (treeCount > 0) {
-            QScopedPointer<QVector<QTreeWidgetItem*>> trees(new QVector<QTreeWidgetItem*>());
+            std::unique_ptr<QVector<QTreeWidgetItem*>> trees(new QVector<QTreeWidgetItem*>());
             for (int i = 0; i < treeCount; ++i) {
                 trees->push_back(this->takeTopLevelItem(0));
             }
             // save
             auto hook = static_cast<ProjectHook*>(mProject->hook());
-            hook->grabObjectTrees(trees.take());
+            hook->grabObjectTrees(trees.release());
         }
     }
     XC_ASSERT(this->topLevelItemCount() == 0);
@@ -427,8 +431,10 @@ void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos) {
         menu.addAction(mFolderAction);
 
         if (objItem && objItem->node().parent()) {
+            menu.addSeparator();
             menu.addAction(mPasteAction);
             menu.addAction(mObjectMirror);
+            menu.addAction(mAddDefaults);
             menu.addSeparator();
             menu.addAction(mDeleteAction);
         }
@@ -1093,6 +1099,94 @@ void ObjectTreeWidget::onObjectMirrorTriggered() {
     }
 }
 
+template<typename T>
+void assignParam(T* key) {
+    QSettings settings;
+    util::Easing::Param aNext;
+    aNext.type = util::Easing::easingToEnum(QString());
+    aNext.range = util::Easing::rangeToEnum(QString());
+    key->data().easing() = aNext;
+}
+void knockKeys(core::Project* mProject, core::ObjectNode& aTarget) {
+    const auto tl = aTarget.timeLine();
+    if (tl->map(core::TimeKeyType_Move).empty() || tl->map(core::TimeKeyType_Move).first()->frame() != 0) {
+        const auto moveKey = new core::MoveKey();
+        moveKey->setPos(tl->current().srt().pos());
+        moveKey->setCentroid(tl->current().srt().centroid());
+        assignParam(moveKey);
+        ctrl::TimeLineUtil::pushNewMoveKey(*mProject, aTarget, 0, moveKey);
+    }
+    if (tl->map(core::TimeKeyType_Rotate).empty() || tl->map(core::TimeKeyType_Rotate).first()->frame() != 0) {
+        const auto rotateKey = new core::RotateKey();
+        rotateKey->setRotate(tl->current().srt().rotate());
+        assignParam(rotateKey);
+        ctrl::TimeLineUtil::pushNewRotateKey(*mProject, aTarget, 0, rotateKey);
+    }
+    if (tl->map(core::TimeKeyType_Scale).empty() || tl->map(core::TimeKeyType_Scale).first()->frame() != 0) {
+        const auto scaleKey = new core::ScaleKey();
+        scaleKey->setScale(tl->current().srt().scale());
+        assignParam(scaleKey);
+        ctrl::TimeLineUtil::pushNewScaleKey(*mProject, aTarget, 0, scaleKey);
+    }
+    if (tl->map(core::TimeKeyType_Depth).empty() || tl->map(core::TimeKeyType_Depth).first()->frame() != 0) {
+        const auto depthKey = new core::DepthKey();
+        depthKey->setDepth(tl->current().depth());
+        assignParam(depthKey);
+        ctrl::TimeLineUtil::pushNewDepthKey(*mProject, aTarget, 0, depthKey);
+    }
+    if (tl->map(core::TimeKeyType_Opa).empty() || tl->map(core::TimeKeyType_Opa).first()->frame() != 0) {
+        const auto opacityKey = new core::OpaKey();
+        opacityKey->setOpacity(tl->current().opa().opacity());
+        assignParam(opacityKey);
+        ctrl::TimeLineUtil::pushNewOpaKey(*mProject, aTarget, 0, opacityKey);
+    }
+    if (tl->map(core::TimeKeyType_HSV).empty() || tl->map(core::TimeKeyType_HSV).first()->frame() != 0) {
+        const auto hsvKey = new core::HSVKey();
+        hsvKey->setHSV(tl->current().hsv().hsv());
+        assignParam(hsvKey);
+        ctrl::TimeLineUtil::pushNewHSVKey(*mProject, aTarget, 0, hsvKey);
+    }
+
+    if (tl->current().bone().areaKey()) {
+        if (tl->map(core::TimeKeyType_Pose).empty() || tl->map(core::TimeKeyType_Pose).first()->frame() != 0) {
+            const auto poseKey = new core::PoseKey();
+            core::BoneKey* parentKey = tl->current().bone().areaKey();
+            XC_PTR_ASSERT(parentKey);
+            if (parentKey == tl->current().poseParent()) {
+                poseKey->data() = tl->current().pose();
+            } else {
+                poseKey->data().createBonesBy(*parentKey);
+            }
+            assignParam(poseKey);
+            ctrl::TimeLineUtil::pushNewPoseKey(*mProject, aTarget, 0, poseKey, parentKey);
+        }
+    }
+
+    if (aTarget.type() == core::ObjectType_Layer) {
+        if (tl->map(core::TimeKeyType_FFD).empty() || tl->map(core::TimeKeyType_FFD).first()->frame() != 0) {
+            const auto ffdKey = new core::FFDKey();
+            ffdKey->data() = tl->current().ffd();
+            core::TimeKey* parentKey = tl->current().ffdMeshParent();
+            assignParam(ffdKey);
+            ctrl::TimeLineUtil::pushNewFFDKey(*mProject, aTarget, 0, ffdKey, parentKey);
+        }
+    }
+
+    if (aTarget.type() == core::ObjectType_Folder) {
+        for(core::ObjectNode* node: aTarget.children()) {
+            knockKeys(mProject, *node);
+        }
+    }
+}
+
+
+void ObjectTreeWidget::onAddDefaultsTriggered() const {
+    if (!mActionItem) { return; }
+    if (!obj::Item::cast(mActionItem)) { return; }
+    obj::Item* objItem = obj::Item::cast(mActionItem);
+    knockKeys(mProject.get(), objItem->node());
+}
+
 void ObjectTreeWidget::onFolderActionTriggered(bool) {
     if (mActionItem) {
         obj::Item* objItem = obj::Item::cast(mActionItem);
@@ -1254,15 +1348,15 @@ void ObjectTreeWidget::showEvent(QShowEvent* aEvent) {
 }
 
 void ObjectTreeWidget::dragMoveEvent(QDragMoveEvent* aEvent) {
-    QPoint cheatPos = aEvent->pos();
+    QPoint cheatPos = aEvent->position().toPoint();
     mDragIndex = cheatDragDropPos(cheatPos);
 
     QDragMoveEvent dummyEvent(
         cheatPos,
         aEvent->dropAction(),
         aEvent->mimeData(),
-        aEvent->mouseButtons(),
-        aEvent->keyboardModifiers(),
+        aEvent->buttons(),
+        aEvent->modifiers(),
         aEvent->type()
     );
     QTreeWidget::dragMoveEvent(&dummyEvent);
@@ -1279,19 +1373,19 @@ void ObjectTreeWidget::dragMoveEvent(QDragMoveEvent* aEvent) {
 
 void ObjectTreeWidget::dropEvent(QDropEvent* aEvent) {
     mDragIndex = QModelIndex();
-    QPoint cheatPos = aEvent->pos();
+    QPoint cheatPos = aEvent->position().toPoint();
     cheatDragDropPos(cheatPos);
     QDropEvent dummyEvent(
         cheatPos,
         aEvent->dropAction(),
         aEvent->mimeData(),
-        aEvent->mouseButtons(),
-        aEvent->keyboardModifiers(),
+        aEvent->buttons(),
+        aEvent->modifiers(),
         aEvent->type()
     );
-    QModelIndex cursorIndex = this->indexAt(aEvent->pos());
+    QModelIndex cursorIndex = this->indexAt(aEvent->position().toPoint());
 
-    if (this->visualRect(cursorIndex).contains(aEvent->pos())) {
+    if (this->visualRect(cursorIndex).contains(aEvent->position().toPoint())) {
         mRemovedPositions.clear();
         mInsertedPositions.clear();
 

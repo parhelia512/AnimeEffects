@@ -354,7 +354,7 @@ namespace prop {
         auto newKey = new core::PoseKey();
         core::BoneKey* parentKey = currline().current().bone().areaKey();
         XC_PTR_ASSERT(parentKey);
-        if (parentKey == (core::BoneKey*)currline().current().poseParent()) {
+        if (parentKey == currline().current().poseParent()) {
             newKey->data() = currline().current().pose();
         } else {
             newKey->data().createBonesBy(*parentKey);

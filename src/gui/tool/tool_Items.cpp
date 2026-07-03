@@ -88,7 +88,11 @@ namespace tool {
 
         mSlider = new QSlider(Qt::Horizontal, aParent);
         mSlider->setFocusPolicy(Qt::NoFocus);
-        mSlider->connect(mSlider, &QSlider::valueChanged, [=](int aValue) { this->updateText(aValue); });
+        QSlider::connect(mSlider, &QSlider::valueChanged, [=](const int aValue) {
+            this->updateText(aValue);
+            // We have to emit this signal so the text update doesn't eat it completely
+            emit mSlider->sliderMoved(aValue);
+        });
     }
 
     void SliderItem::setAttribute(const util::Range& aRange, int aValue, int aPageStep, int aStep) {
@@ -105,6 +109,11 @@ namespace tool {
 
     void SliderItem::connectOnMoved(const std::function<void(int)>& aSliderMoved) {
         mSlider->connect(mSlider, &QSlider::sliderMoved, aSliderMoved);
+    }
+    // In case we consumed a signal, we just check both
+    void SliderItem::connectOnAny(const std::function<void(int)>& aValue) {
+        QSlider::connect(mSlider, &QSlider::valueChanged, aValue);
+        QSlider::connect(mSlider, &QSlider::sliderMoved, aValue);
     }
 
     int SliderItem::updateGeometry(const QPoint& aPos, int aWidth) {

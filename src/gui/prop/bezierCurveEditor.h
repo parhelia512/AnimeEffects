@@ -54,7 +54,7 @@ public:
     QPen        m_curvePen;
 
     bool        m_dragging;
-    int         m_selectedPoint;
+    int         m_selectedPoint{};
 };
 
 #endif // BEZIERCURVEEDITOR_H

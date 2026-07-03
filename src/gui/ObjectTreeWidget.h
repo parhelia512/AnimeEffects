@@ -93,6 +93,7 @@ private:
     void onPasteActionTriggered(bool aIsTriggered) const;
     void onObjectActionTriggered(bool aIsTriggered);
     void onObjectMirrorTriggered();
+    void onAddDefaultsTriggered() const;
     void onFolderActionTriggered(bool aIsTriggered);
     void onDeleteActionTriggered(bool aIsTriggered);
     void onAddTreeTriggered(bool);
@@ -122,6 +123,7 @@ private:
     QAction* mPasteAction;
     QAction* mObjectAction;
     QAction* mObjectMirror;
+    QAction* mAddDefaults;
     QAction* mFolderAction;
     QAction* mDeleteAction;
 

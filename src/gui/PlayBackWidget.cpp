@@ -33,23 +33,23 @@ void PlayBackWidget::setPushDelegate(const PushDelegate& aDelegate) {
     PlayBackWidget* owner = this;
     mPushDelegate = aDelegate;
 
-    gui::PlayBackWidget::connect(mButtons.at(2), &QPushButton::pressed, [=]() {
+    connect(mButtons.at(2), &QPushButton::pressed, [=]() {
         const bool isChecked = owner->mButtons.at(2)->isChecked();
         const char* name = isChecked ? "play" : "pause";
         owner->mButtons.at(2)->setIcon(owner->mGUIResources.icon(name));
         owner->mButtons.at(2)->setToolTip(isChecked ? tr("Play") : tr("Pause"));
         owner->mPushDelegate(isChecked ? PushType_Pause : PushType_Play);
     });
-    gui::PlayBackWidget::connect(mButtons.at(5), &QPushButton::pressed, [=]() {
+    connect(mButtons.at(5), &QPushButton::pressed, [=]() {
         const bool isChecked = owner->mButtons.at(5)->isChecked();
         owner->mPushDelegate(isChecked ? PushType_NoLoop : PushType_Loop);
     });
 
-    gui::PlayBackWidget::connect(mButtons.at(0), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_Rewind); });
-    gui::PlayBackWidget::connect(mButtons.at(1), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_StepBack); });
-    gui::PlayBackWidget::connect(mButtons.at(3), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_Step); });
-    gui::PlayBackWidget::connect(mButtons.at(4), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_Fast); });
-    gui::PlayBackWidget::connect(mButtons.at(6), &QPushButton::pressed, [=](){
+    connect(mButtons.at(0), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_Rewind); });
+    connect(mButtons.at(1), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_StepBack); });
+    connect(mButtons.at(3), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_Step); });
+    connect(mButtons.at(4), &QPushButton::pressed, [=]() { owner->mPushDelegate(PushType_Fast); });
+    connect(mButtons.at(6), &QPushButton::pressed, [=](){
         if(audioUI == nullptr || audioWidget == nullptr){
             audioWidget =  new AudioPlaybackWidget;
             audioUI = new QWidget(this, Qt::Window);

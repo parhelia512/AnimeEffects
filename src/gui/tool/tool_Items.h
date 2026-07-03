@@ -41,6 +41,9 @@ namespace tool {
         void setAttribute(const util::Range& aRange, int aValue, int aPageStep, int aStep = 1);
         void connectOnChanged(const std::function<void(int)>& aValueChanged);
         void connectOnMoved(const std::function<void(int)>& aSliderMoved);
+
+        void connectOnAny(const std::function<void(int)> &aValue);
+
         int updateGeometry(const QPoint& aPos, int aWidth);
         void show() {
             mSlider->show();

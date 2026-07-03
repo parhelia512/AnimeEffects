@@ -27,7 +27,9 @@ bool AudioPlaybackWidget::serialize(std::vector<audioConfig>* pConf, const QStri
         x++;
     }
     QFile file(outPath);
-    file.open(QIODevice::ReadWrite);
+    if (!file.open(QIODevice::ReadWrite)) {
+        return false;
+    }
     file.write(QJsonDocument(audioJson).toJson(QJsonDocument::Indented));
     file.close();
     return true;
@@ -70,19 +72,18 @@ void AudioPlaybackWidget::aPlayer(std::vector<audioConfig>* pConf, bool play, me
         QAudioOutput* output = state->outputs.at(x);
         const audioConfig& config = pConf->at(x);
 
-
-
         if(player->audioOutput() == nullptr){ player->setAudioOutput(output); }
         if(player->source() != QUrl::fromLocalFile(config.audioPath.absoluteFilePath())){
             player->setSource(config.audioPath.absoluteFilePath());
         }
         if(output->volume() != getVol(config.volume)){ output->setVolume(getVol(config.volume)); }
         correctTrackPos(player, curFrame, frameCount, fps, const_cast<audioConfig&>(config));
-        //qDebug("---");
-        //qDebug() << "x = " << x << "; track = " << player->source() << "; current playback state = " << player->playbackState() << "; play = " << play;
-        //qDebug("---");
-        if(!play){ player->stop(); state->playing = false;}
-        if(play && config.startFrame < curFrame && config.endFrame > curFrame && config.playbackEnable){
+        if (state->playing || play && player->playbackState() == QMediaPlayer::PlayingState) {
+            if (!state->playing) {state->playing = true;}
+            // Do nothing
+        }
+        else if(!play){ player->stop(); state->playing = false;}
+        else if(config.startFrame < curFrame && config.endFrame > curFrame && config.playbackEnable){
             player->play();
             state->playing = true;
         }
@@ -368,8 +369,8 @@ void AudioPlaybackWidget::addUIState(std::vector<audioConfig>* config, int index
         curUIState.musDurationLabel->setText(QCoreApplication::translate("audioWidget", "<html><head/><body><p align=\"center\">Duration (in frames): </p></body></html>", nullptr) +
                                        "<html><head/><body><p align=\"center\">" + QString::number(val - config->at(index).startFrame) + "</p></body></html>");
     }));
-    checkConnection(QCheckBox::connect(curUIState.playAudio, &QCheckBox::stateChanged, [=](const bool val){
-        config->at(index).playbackEnable = val;
+    checkConnection(QCheckBox::connect(curUIState.playAudio, &QCheckBox::checkStateChanged, [=](const Qt::CheckState val){
+        config->at(index).playbackEnable = (val == Qt::Checked);
     }));
     checkConnection(QSlider::connect(curUIState.volumeSlider, &QSlider::valueChanged, [=](const int val){
         config->at(index).volume = val;
@@ -419,5 +420,6 @@ void AudioPlaybackWidget::correctTrackPos(QMediaPlayer* player, int curFrame,  i
     constexpr float toMillis = 1000.0;
     const int frame = frameCount - (frameCount - config.startFrame - curFrame);
     auto positionMs = static_cast<qint64>(static_cast<float>(frame) / static_cast<float>(fps) * toMillis);
+    if (player->position() == positionMs || player->position() + 1 == positionMs || player->position() -1 == positionMs) { return; }
     if (player->hasAudio() && positionMs >= 0) { player->setPosition(positionMs); }
 }

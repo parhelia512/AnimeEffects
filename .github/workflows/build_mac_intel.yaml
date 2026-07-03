@@ -1,4 +1,4 @@
-name: MacOS 14 - Intel
+name: MacOS 15 - Intel
 on:
   workflow_dispatch:
   schedule:
@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   buildMacOS:
-    runs-on: macos-14-large
+    runs-on: macos-15-intel
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4

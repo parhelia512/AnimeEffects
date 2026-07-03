@@ -15,7 +15,7 @@ public:
     NetworkUtil();
     static QByteArray getByteArray(QString aURL);
     static QJsonDocument getJsonFrom(const QString& aURL);
-    static bool libExists(const QString& aLib, QString versionType = "-V");
+    static bool libExists(const QString &aLib, const QString &versionType, const QString &versionStr = "version");
     static bool libExists(const char* libName);
     static QList<QString> libArgs(QList<QString> anArgument, QString aType);
     static QFileInfo downloadGithubFile(const QString& aURL, const QString& aFile, int aID, QWidget* aParent);

@@ -59,6 +59,16 @@ public:
         return static_cast<float>(max) - value + static_cast<float>(min);
     }
 
+    static void delay() // https://stackoverflow.com/questions/3752742/how-do-i-create-a-pause-wait-function-using-qt#11487434
+    {
+        QTime dieTime= QTime::currentTime().addSecs(1);
+        while (QTime::currentTime() < dieTime) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+            // So we don't blow up the CPU but also the user doesn't notice too much
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+
     void setupUi(QDialog *splineWidget, const gui::GUIResources* guiRes, util::Easing::CubicBezier* cubicBezier) {
         bezier = cubicBezier;
         if (splineWidget->objectName().isEmpty())
@@ -112,9 +122,9 @@ public:
                     static_cast<float>(spins[3]->value())
                 };
                 m_editor->bezier = cubicBezier;
-                int width = m_editor->width();
-                int height = m_editor->height();
-                QPointF points1 = {
+                const int width = m_editor->width();
+                const int height = m_editor->height();
+                const QPointF points1 = {
                     denormalize(cubicBezier->x1, 20, width - 20), 
                     denormalize(invert(0, 1, cubicBezier->y1), 20, height -20)};
                 QPointF points2 = {
@@ -149,23 +159,37 @@ public:
             str.append(QString::number(bezier->y2));
             QClipboard *clip = QGuiApplication::clipboard();
             clip->setText(str);
-            QMessageBox::information(splineWidget, "Copied", "Copied bezier to clipboard");
+            toolButton->setText("Success ✓");
+            delay();
+            toolButton->setText("Copy");
         });
 
         gridLayout_2->addWidget(toolButton_2, 3, 5, 1, 1);
 
         QToolButton::connect(toolButton_2, &QToolButton::clicked, [=]() {
             QClipboard *clip = QGuiApplication::clipboard();
-            QStringList list = clip->text().split(",");
-            if (!list.isEmpty() && list.size() == 4) {
+            if (QStringList list = clip->text().split(","); !list.isEmpty() && list.size() == 4) {
                 bezier->x1 = list[0].toFloat();
                 bezier->y1 = list[1].toFloat();
                 bezier->x2 = list[2].toFloat();
                 bezier->y2 = list[3].toFloat();
-                spins[0]->setValue(bezier->x1);
-                spins[1]->setValue(bezier->y1);
-                spins[2]->setValue(bezier->x2);
-                spins[3]->setValue(bezier->y2);
+                m_editor->blockSignals(true);
+                m_editor->bezier = bezier;
+                const int width = m_editor->width();
+                const int height = m_editor->height();
+                const QPointF points1 = {
+                    denormalize(bezier->x1, 20, width - 20),
+                    denormalize(invert(0, 1, bezier->y1), 20, height -20)};
+                const QPointF points2 = {
+                    denormalize(bezier->x2, 20, width - 20),
+                    denormalize(invert(0, 1, bezier->y2), 20, height - 20)};
+                m_editor->m_points[1] = points1;
+                m_editor->m_points[2] = points2;
+                m_editor->blockSignals(false);
+                m_editor->repaint();
+                toolButton_2->setText("Success ✓");
+                delay();
+                toolButton_2->setText("Paste");
             }
             else {
                 QMessageBox::information(splineWidget, "Error", "Invalid clipboard data");

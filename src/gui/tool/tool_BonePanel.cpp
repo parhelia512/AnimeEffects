@@ -53,22 +53,22 @@ namespace tool {
         // paint influence radius
         mPIRadius.reset(new SliderItem(tr("Radius"), this->palette(), this));
         mPIRadius->setAttribute(util::Range(5, 1000), mParam.piRadius, 50);
-        mPIRadius->connectOnChanged([=](int aValue) {
+        mPIRadius->connectOnAny([=](int aValue) {
             this->mParam.piRadius = aValue;
             this->onParamUpdated(false);
         });
 
         // paint influence pressure
         mPIPressure.reset(new SliderItem(tr("Pressure"), this->palette(), this));
-        mPIPressure->setAttribute(util::Range(0, kScale), mParam.piPressure * kScale, kScale / 10);
-        mPIPressure->connectOnMoved([=](int aValue) {
-            this->mParam.piPressure = (float)aValue / kScale;
-            this->onParamUpdated(false);
+        mPIPressure->setAttribute(util::Range(0, kScale), static_cast<int>(mParam.piPressure * kScale), kScale / 10);
+        mPIPressure->connectOnAny([=](const int aValue) {
+            this->mParam.piPressure = static_cast<float>(aValue) / kScale;
+            this->onParamUpdated(true);
         });
         // erase influence radius
         mEIRadius.reset(new SliderItem(tr("Radius"), this->palette(), this));
         mEIRadius->setAttribute(util::Range(5, 1000), mParam.eiRadius, 50);
-        mEIRadius->connectOnChanged([=](int aValue) {
+        mEIRadius->connectOnAny([=](int aValue) {
             this->mParam.eiRadius = aValue;
             this->onParamUpdated(false);
         });
@@ -76,7 +76,7 @@ namespace tool {
         // erase influence pressure
         mEIPressure.reset(new SliderItem(tr("Pressure"), this->palette(), this));
         mEIPressure->setAttribute(util::Range(0, kScale), mParam.eiPressure * kScale, kScale / 10);
-        mEIPressure->connectOnMoved([=](int aValue) {
+        mEIPressure->connectOnAny([=](int aValue) {
             this->mParam.eiPressure = (float)aValue / kScale;
             this->onParamUpdated(false);
         });
