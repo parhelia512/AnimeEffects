@@ -16,7 +16,7 @@ public:
         Unit(): parent(), mesh(), trans() {}
         const TimeKey* parent;
         const GridMesh* mesh;
-        GridMesh::Transitions trans;
+        mutable GridMesh::Transitions trans;
     };
     ResourceUpdatingWorkspace();
 

@@ -1,5 +1,6 @@
 #include "util/ArrayBlock.h"
 #include "core/FFDKeyUpdater.h"
+#include "TimeKeyExpans.h"
 #include "core/FFDKey.h"
 
 namespace core {
@@ -34,6 +35,14 @@ public:
             }
 
             if (transUnit->mesh->vertexCount() > 0) {
+                // If there's no data to work with when there should be we make it up
+                if (ffdKey->data().count() == 0) {
+                    ffdKey->data().insertVtx(0, {0,0,0});
+                    while (transUnit->trans.data.count() != transUnit->mesh->vertexCount()) {
+                        if (transUnit->trans.data.count() >= transUnit->mesh->vertexCount()) { break; }
+                        transUnit->trans.data.append(GridMesh::Transition());
+                    }
+                }
                 // calculate new ffd data
                 util::ArrayBlock<const gl::Vector3> posArray(ffdKey->data().positions(), ffdKey->data().count());
                 auto newFFD = transUnit->mesh->createFFD(posArray, transUnit->trans);
