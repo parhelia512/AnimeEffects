@@ -55,9 +55,9 @@ AnimeEffects will notify you of available stable releases as soon as they come o
 
 #### This is what we are compiling and testing the software on, it may work on older versions but this is discouraged
 
-- Windows 10 (this version approaches EOL, we suggest you upgrade or change OS soon) or newer
+- Windows 11 or newer
 - Ubuntu LTS or comparable distro
-- MacOS Ventura or newer (Intel is supported but we test on ARM chips)
+- MacOS 15 or newer (Intel is supported but we test on ARM chips)
 
 ## Development requirements
 
