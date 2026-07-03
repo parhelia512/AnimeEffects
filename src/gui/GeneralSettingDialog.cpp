@@ -743,14 +743,19 @@ bool GeneralSettingDialog::ffmpegCheck(const QString& ffmpeg, GeneralSettingDial
     QTemporaryDir tempDir;
     QDir ffmpegOutputDir = tempDir.isValid() ? tempDir.path() : QDir::temp();
 
-    // PNG to GIF conversion test
-    QString testFile = QFileInfo("./data/themes/classic/icon/filew.png").absoluteFilePath();
+    // Noise to GIF conversion test
     QProcess gif;
     QString gifLoc = ffmpegOutputDir.absoluteFilePath("gif.gif");
-    qDebug() << gifLoc;
-    gif.start(ffmpeg, {"-i", testFile, gifLoc}, QProcess::ReadWrite);
+    qDebug() << "Gif loc: " << gifLoc;
+    gif.start(ffmpeg, {"-f", "bin", "-i", "pipe:", "-y", gifLoc}, QProcess::ReadWrite);
+    std::string testData = "Test";
+    for (auto x = 0; x < 2; x++) {
+        gif.write(testData.c_str(), testData.size());
+        gif.waitForBytesWritten();
+    }
+    gif.closeWriteChannel();
     gif.waitForFinished();
-    qDebug() << gif.readAll();
+    qDebug() << gif.readAllStandardOutput();
     bool exportSuccess = gif.exitStatus() == 0 && QFileInfo::exists(gifLoc);
     qDebug() << "Gif exists: " << QFileInfo::exists(gifLoc) << "| Gif remove: " << QFile(gifLoc).remove();
     gif.deleteLater();
@@ -774,8 +779,15 @@ bool GeneralSettingDialog::ffmpegCheck(const QString& ffmpeg, GeneralSettingDial
     // Palettegen test
     QProcess palettegen;
     QString palettegenLoc = ffmpegOutputDir.absoluteFilePath("palette.gif");
-    palettegen.start(ffmpeg, {"-i", testFile, "-vf", "palettegen", palettegenLoc}, QProcess::ReadWrite);
+    qDebug() << "Palette loc: " << palettegenLoc;
+    palettegen.start(ffmpeg, {"-f", "bin", "-i", "pipe:", "-y", "-vf", "palettegen", palettegenLoc}, QProcess::ReadWrite);
+    for (auto x = 0; x < 2; x++) {
+        palettegen.write(testData.c_str(), testData.size());
+        palettegen.waitForBytesWritten();
+    }
+    palettegen.closeWriteChannel();
     palettegen.waitForFinished();
+    qDebug() << palettegen.readAllStandardOutput();
     bool pGenSuccess = palettegen.exitStatus() == 0 && QFileInfo::exists(palettegenLoc);
     if (!pGenSuccess) {
         ffmpegNotif.setWindowTitle(tr("FFmpeg doesn't generate palettes"));

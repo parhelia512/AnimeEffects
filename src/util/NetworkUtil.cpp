@@ -26,7 +26,7 @@ QByteArray NetworkUtil::getByteArray(QString aURL) {
     arguments.pop_front();
     mProcess.start(program, arguments);
     // Waits for a second, todo: make this only apply to start check
-    mProcess.waitForFinished(1 * 1000);
+    mProcess.waitForFinished(2 * 1000);
     if (mProcess.exitCode() == 0) {
         response = mProcess.readAll();
     } else {
@@ -50,27 +50,27 @@ QJsonDocument NetworkUtil::getJsonFrom(const QString& aURL) {
     return QJsonDocument::fromJson(data.data());
 }
 
-auto NetworkUtil::libExists(const QString& aLib, QString versionType) -> bool {
+bool NetworkUtil::libExists(const QString &aLib, const QString &versionType, const QString &versionStr) {
     QProcess process;
-    process.start(aLib, {std::move(versionType)}, QProcess::ReadWrite);
+    process.start(aLib, {versionType}, QProcess::ReadWrite);
     process.waitForFinished();
     if (process.exitStatus() != 0) {
         return false;
     }
-    // Very much a lazy hack, regex checks for numbers with dots at either side
-    return QString(process.readAll().data()).contains(QRegularExpression(R"(((\d+\.)|(\.+\d)))"));
+    // Checks for part of the version string existing
+    return QString(process.readAll().data()).contains(versionStr);
 }
 bool NetworkUtil::libExists(const char* libName) {
     QProcess process;
     #ifdef Q_OS_WIN
-        process.start("where", {libName}, QProcess::ReadWrite);
+        process.start("where.exe", {libName}, QProcess::ReadWrite);
     #elif defined(Q_OS_MAC)
         process.start("which", {libName}, QProcess::ReadWrite);
     #else
         process.start("which", {libName}, QProcess::ReadWrite);
     #endif
     process.waitForFinished();
-    if (process.exitStatus() != 0 || QString(process.readAllStandardOutput().data()).isEmpty()) {
+    if (process.exitStatus() != 0) {
         return false;
     }
     return true;
@@ -86,7 +86,7 @@ QList<QString> NetworkUtil::libArgs(QList<QString> aArgument, QString aType) {
     } else if (os() == "linux") {
         lib = "wget";
     }
-    if (!libExists(lib)) {
+    if (!libExists(lib, "-V", lib == "curl"? lib: "Wget")) {
         qDebug() << lib << " couldn't be found.";
         auto failedLib = lib;
         if (lib == "wget") {
@@ -94,7 +94,7 @@ QList<QString> NetworkUtil::libArgs(QList<QString> aArgument, QString aType) {
         } else {
             lib = "wget";
         }
-        if (!libExists(lib)) {
+        if (!libExists(lib, "-V", lib == "curl"? lib: "Wget")) {
             return QList<QString>({failedLib, "failed"});
         }
     }
@@ -121,7 +121,7 @@ QList<QString> NetworkUtil::libArgs(QList<QString> aArgument, QString aType) {
     return args;
 }
 
-// Function written in consideration of the "releases/{version}" api, e.g.
+// Function written in consideration of the "releases/{version}" api, e.g.,
 // https://api.github.com/repos/author/project/releases/latest
 QFileInfo NetworkUtil::downloadGithubFile(const QString& aURL, const QString& aFile, int aID, QWidget* aParent) {
     const QJsonObject jsonResponse = getJsonFrom(aURL).object();
@@ -222,11 +222,9 @@ void NetworkUtil::checkForUpdate(const QString& url, NetworkUtil networking, QWi
     const QFuture<QJsonDocument> jsonPromise = QtConcurrent::run(getJsonFrom, url);
     const QString currentVersion = QString::number(AE_MAJOR_VERSION) + "." + QString::number(AE_MINOR_VERSION) + "." +
         QString::number(AE_MICRO_VERSION);
-    /*
-        qDebug()<< "Response : " << jsonResponse.toJson().data();
-        qDebug()<< "Current version: " << currentVersion << "\n" << "Latest stable: " <<
-       jsonResponse[0]["name"].toString().replace("v", "");;
-    */
+    // qDebug()<< "Response : " << jsonPromise.result().toJson().data();
+    // qDebug()<< "Current version: " << currentVersion << "\n" << "Latest stable: " <<
+    // jsonPromise.result()[0]["name"].toString().replace("v", "");
     const QJsonDocument jsonResponse = jsonPromise.result();
     const QString latestVersion = !jsonResponse.isEmpty() ? jsonResponse[0]["name"].toString().replace("v", "") : "null";
 
