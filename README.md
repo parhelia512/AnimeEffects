@@ -53,7 +53,7 @@ AnimeEffects will notify you of available stable releases as soon as they come o
 
 ## OS Targets
 
-#### This is what we are compiling and testing the software on, it may work on older versions but this is discouraged
+#### This are the OS versions we are compiling, testing and releasing the software in. It probably works in older versions but no support will be provided.
 
 - Windows 11 or newer
 - Ubuntu LTS or comparable distro
