@@ -313,7 +313,12 @@ void NetworkUtil::checkForUpdate(const QString& url, NetworkUtil networking, QWi
                 } else if (os == "linux") {
                     file = "AnimeEffects-Linux.zip";
                 } else if (os == "mac") {
-                    file = "AnimeEffects-MacOS.zip";
+                    if (QSysInfo::buildCpuArchitecture() == "arm64") {
+                        file = "AnimeEffects-MacOS-ARM.zip";
+                    }
+                    else {
+                        file = "AnimeEffects-MacOS.zip";
+                    }
                 }
                 const QFileInfo aeUpdate = downloadGithubFile(
                     "https://api.github.com/repos/AnimeEffectsDevs/AnimeEffects/releases/latest", file, 0, aParent
