@@ -15,6 +15,7 @@
 #include "gui/GeneralSettingDialog.h"
 #include "gui/MouseSettingDialog.h"
 #include "util/NetworkUtil.h"
+#include <algorithm>
 #ifdef Q_OS_WINDOWS
 #include <Windows.h>
 #endif
@@ -685,7 +686,7 @@ ProjectCanvasSizeSettingDialog::ProjectCanvasSizeSettingDialog(
     auto curSize = mProject.attribute().imageSize();
     {
         auto devInfo = mViaPoint.glDeviceInfo();
-        const int maxBufferSize = min(devInfo.maxTextureSize, devInfo.maxRenderBufferSize);
+        const int maxBufferSize = std::min(devInfo.maxTextureSize, devInfo.maxRenderBufferSize);
         XC_ASSERT(maxBufferSize > 0);
 
         auto form = new QFormLayout();

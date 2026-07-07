@@ -22,7 +22,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install requests semantic_version patch py7zr texttable bs4 defusedxml aqtinstall
-      - name: Get Qt 6.6
+      - name: Get Qt 6.9.*
         uses: jurplel/install-qt-action@v3
         with:
           aqtversion: "==3.3.*"
