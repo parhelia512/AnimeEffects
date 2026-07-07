@@ -26,7 +26,7 @@ QByteArray NetworkUtil::getByteArray(QString aURL) {
     arguments.pop_front();
     mProcess.start(program, arguments);
     // Waits for a second, todo: make this only apply to start check
-    mProcess.waitForFinished(2 * 1000);
+    mProcess.waitForFinished();
     if (mProcess.exitCode() == 0) {
         response = mProcess.readAll();
     } else {
