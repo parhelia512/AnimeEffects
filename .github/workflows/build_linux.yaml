@@ -26,11 +26,11 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           aqtversion: "==3.3.*"
-          version: "6.9.3"
-          host: "linux"
-          target: "desktop"
-          arch: "gcc_64"
-          modules: "qtimageformats qtmultimedia qt5compat qtwaylandcompositor"
+          version: '6.9.3'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'linux_gcc_64'
+          modules: "qt5compat qtimageformats qtmultimedia qtwaylandcompositor"
           install-deps: "nosudo"
           setup-python: "false"
           tools: "tools_cmake tools_ninja tools_opensslv3_src"
