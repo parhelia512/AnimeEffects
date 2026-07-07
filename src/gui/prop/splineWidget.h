@@ -20,7 +20,6 @@
 #include "gui/prop/bezierCurveEditor.h"
 #include "tool/tool_FFDPanel.h"
 #include "util/Easing.h"
-#include "util/Easing.h"
 #include <QtConcurrent>
 
 #include <QMessageBox>
@@ -65,7 +64,7 @@ public:
         while (QTime::currentTime() < dieTime) {
             QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
             // So we don't blow up the CPU but also the user doesn't notice too much
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            QThread::sleep(std::chrono::milliseconds(10));
         }
     }
 
