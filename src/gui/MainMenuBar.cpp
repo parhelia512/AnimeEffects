@@ -17,6 +17,7 @@
 #include "util/NetworkUtil.h"
 #include <algorithm>
 #ifdef Q_OS_WINDOWS
+#define NOMINMAX
 #include <Windows.h>
 #endif
 #define VENDOR_ID_LEN 13
