@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(AnimeEffects VERSION 1.6.2 LANGUAGES C CXX)
+project(AnimeEffects VERSION 1.7.1 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -22,3 +22,16 @@ add_subdirectory(src/core)
 add_subdirectory(src/ctrl)
 add_subdirectory(src/gui)
 add_subdirectory(src/deps/pugixml)
+
+if(APPLE)
+    set_target_properties( ${PROJECT_NAME}
+            PROPERTIES
+            MACOSX_BUNDLE_NAME                             ${PROJECT_NAME}
+            MACOSX_BUNDLE_VERSION                          ${PROJECT_VERSION}
+            MACOSX_BUNDLE_GUI_IDENTIFIER                   org.AnimeEffectsDevs.${PROJECT_NAME}
+            MACOSX_BUNDLE_ICON_FILE                        AnimeEffects.icns
+            MACOSX_BUNDLE                                  TRUE
+            XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY             AnimeEffectsDevs
+            XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED          NO
+    )
+endif ()
