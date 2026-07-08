@@ -2,9 +2,9 @@
 
 ## Download
 
-|                                                                                                                                                               Stable (v1.7)                                                                                                                                                               |                                                                                                                                                                                     Nightly                                                                                                                                                                                      |                                          Source code                                           |
+|                                                                                                                                                               Stable (v1.7.1)                                                                                                                                                               |                                                                                                                                                                                     Nightly                                                                                                                                                                                      |                                          Source code                                           |
 | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------: |
-| [Windows](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.7/AnimeEffects-Windows.zip) - [MacOS](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.7/AnimeEffects-MacOS.zip) - [Linux](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.7/AnimeEffects-Linux.zip) | [Windows](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build-windows.yaml/master/AnimeEffects-Windows-x64.zip) - [MacOS](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_mac_intel.yaml/master/AnimeEffects-MacOS.zip) - [Linux](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_linux.yaml/master/AnimeEffects-Linux.zip) | [Download ZIP](https://github.com/AnimeEffectsDevs/AnimeEffects/archive/refs/heads/master.zip) |
+| [Windows](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.7.1/AnimeEffects-Windows.zip) - [MacOS](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.7.1/AnimeEffects-MacOS.zip) - [Linux](https://github.com/AnimeEffectsDevs/AnimeEffects/releases/download/v1.7.1/AnimeEffects-Linux.zip) | [Windows](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build-windows.yaml/master/AnimeEffects-Windows-x64.zip) - [MacOS](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_mac_intel.yaml/master/AnimeEffects-MacOS.zip) - [Linux](https://nightly.link/AnimeEffectsDevs/AnimeEffects/workflows/build_linux.yaml/master/AnimeEffects-Linux.zip) | [Download ZIP](https://github.com/AnimeEffectsDevs/AnimeEffects/archive/refs/heads/master.zip) |
 
 ## 🌐 README 🌐
 
@@ -61,7 +61,7 @@ AnimeEffects will notify you of available stable releases as soon as they come o
 
 ## Development requirements
 
-- Qt 6.6.X
+- Qt 6.9.3 or later
 - Vulkan Headers
 - CMake 3.16 or later
 - MSVC/GCC/CLang (64-bit)
@@ -78,7 +78,7 @@ sudo apt install -y software-properties-common g++ make cmake ninja-build wget r
 sudo apt install -y libgl1-mesa-dev file libvulkan-dev openssl python3 python3-pip libxcb-cursor0 libxrandr2 wget
 pip install -U pip
 pip install aqtinstall
-aqt install-qt linux desktop 6.6.2 gcc_64 -m qtimageformats qtmultimedia qt5compat
+aqt install-qt linux desktop 6.9.3 linux_gcc_64 -m qtimageformats qtmultimedia qt5compat
 git clone https://github.com/AnimeEffectsDevs/AnimeEffects
 cd AnimeEffects
 cmake -S . -B build -G "Ninja Multi-Config"
@@ -125,7 +125,7 @@ Copy-Item ".\AnimeEffects.exe" ".\AnimeEffects-Windows-x64\"
 brew install cmake ninja vulkan-headers
 pip install -U pip
 pip install aqtinstall
-aqt install-qt mac desktop 6.6.2 clang_64 -m qtimageformats qtmultimedia qt5compat
+aqt install-qt mac desktop 6.9.3 clang_64 -m qtimageformats qtmultimedia qt5compat
 git clone https://github.com/AnimeEffectsDevs/AnimeEffects
 cd AnimeEffects
 cmake -S . -B build -G "Ninja Multi-Config"
@@ -138,6 +138,7 @@ cp -R ../../../../dist appdir/dist
 find appdir/
 cd appdir
 macdeployqt AnimeEffects.app
+# Fix script not necessary for ARM builds
 wget https://raw.githubusercontent.com/OpenZWave/ozw-admin/master/scripts/macdeployqtfix.py && chmod a+x macdeployqtfix.py
 ./macdeployqtfix.py AnimeEffects.app /usr/local/Cellar/qt/*/
 ```
